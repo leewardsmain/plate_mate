@@ -43,7 +43,7 @@ Resources:
           RequireUppercase: true
       Schema:
         - Name: email
-          AttributeType: String
+          AttributeDataType: String
           Required: true
           Mutable: true
 
