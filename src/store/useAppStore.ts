@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
 import type { Toast, ToastType } from '../components/ui/Toast';
-import { fetchAuthSession, signOut as amplifySignOut } from 'aws-amplify/auth';
+import { fetchAuthSession, signOut as amplifySignOut } from '../services/authAdapter';
 
 export type Sentiment = 'love' | 'leave' | 'none';
 
@@ -222,10 +222,26 @@ export const useAppStore = create<AppState>((set, get) => ({
     },
 
     initApp: async () => {
+        let currentUserId = get().currentUser.id;
+
         try {
             const session = await fetchAuthSession();
             if (session.tokens) {
                 set({ isAuthenticated: true });
+                const payload = session.tokens.idToken?.payload;
+                if (payload) {
+                    const sub = payload.sub as string;
+                    currentUserId = sub;
+                    set((state) => ({
+                        currentUser: {
+                            ...state.currentUser,
+                            id: sub,
+                            email: payload.email as string,
+                            name: (payload.name as string) || 'User',
+                            handle: (payload.preferred_username as string) || 'user',
+                        }
+                    }));
+                }
             } else {
                 set({ isAuthenticated: false });
             }
@@ -235,14 +251,32 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
 
         try {
-            const reviews = await api.getReviews();
+            const reviews = await api.getReviews().catch(() => []);
             if (reviews && reviews.length > 0) {
                 set({ feedReviews: reviews });
             }
-            const user = await api.getUser(get().currentUser.id);
-            if (user && user.userId) {
-                // Map ApiUser back to UserProfile
-                set({ currentUser: { ...get().currentUser, ...user, id: user.userId } });
+
+            if (get().isAuthenticated) {
+                let user = await api.getUser(currentUserId).catch(() => null);
+
+                // If user doesn't exist in DB yet (new signup), create their record
+                if (!user || Object.keys(user).length === 0) {
+                    const storeUser = get().currentUser;
+                    const newUserProfile = {
+                        name: storeUser.name,
+                        email: storeUser.email,
+                        handle: storeUser.handle,
+                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(storeUser.name)}&background=random`,
+                        reviewCount: 0,
+                    };
+                    await api.updateUser(currentUserId, newUserProfile);
+                    user = { userId: currentUserId, ...newUserProfile } as any;
+                }
+
+                if (user && user.userId) {
+                    // Map ApiUser back to UserProfile
+                    set({ currentUser: { ...get().currentUser, ...user, id: user.userId } });
+                }
             }
         } catch (error) {
             console.error("Init app failed:", error);
