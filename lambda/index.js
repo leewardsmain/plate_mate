@@ -165,20 +165,11 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Review updated" }) };
         }
 
-        // DELETE /reviews/{id}
-        else if (httpMethod === 'DELETE' && path.startsWith('/reviews/')) {
-            const reviewId = path.split('/').pop();
-            await ddbDocClient.send(new DeleteCommand({
-                TableName: REVIEWS_TABLE,
-                Key: { reviewId }
-            }));
-            return { statusCode: 204, headers, body: "" };
-        }
 
         // --- USERS ROUTES ---
 
         // GET /users/{id}
-        else if (httpMethod === 'GET' && path.startsWith('/users/')) {
+        else if (httpMethod === 'GET' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
             const result = await ddbDocClient.send(new GetCommand({
                 TableName: USERS_TABLE,
@@ -188,7 +179,7 @@ exports.handler = async (event) => {
         }
 
         // PUT /users/{id}
-        else if (httpMethod === 'PUT' && path.startsWith('/users/')) {
+        else if (httpMethod === 'PUT' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
             await ddbDocClient.send(new PutCommand({
                 TableName: USERS_TABLE,
@@ -198,7 +189,7 @@ exports.handler = async (event) => {
         }
 
         // DELETE /users/{id}
-        else if (httpMethod === 'DELETE' && path.startsWith('/users/')) {
+        else if (httpMethod === 'DELETE' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
             await ddbDocClient.send(new DeleteCommand({
                 TableName: USERS_TABLE,
@@ -261,7 +252,6 @@ exports.handler = async (event) => {
 
         // PUT /restaurants/{id} (Update Cached Restaurant Attributes)
         else if (httpMethod === 'PUT' && path.startsWith('/restaurants/')) {
-            const RESTAURANTS_TABLE = process.env.RESTAURANTS_TABLE || "platemate-restaurants";
             const placeId = path.split('/').pop();
 
             // First get the existing record, or it will fail if it's not cached yet
