@@ -73,6 +73,7 @@ describe('Lambda Backend Unit Tests', () => {
         };
 
         const result = await handler(event);
+        if (result.statusCode === 500) console.log('DEBUG 500 ERROR:', result.body);
         expect(result.statusCode).toBe(200);
         const body = JSON.parse(result.body);
         expect(body.uploadUrl).toBeDefined();
