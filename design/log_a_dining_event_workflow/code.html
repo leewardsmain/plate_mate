@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log a Dining Event Workflow - PlateMate</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f49d25",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221a10",
+                        "surface-dark": "#1E1E1E",
+                        "glass-dark": "rgba(34, 26, 16, 0.7)",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(35, 27, 16, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Smooth transitions */
+        .transition-all-custom {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom Scrollbar for the modal body */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(244, 157, 37, 0.3);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(244, 157, 37, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex items-center justify-center p-4 bg-[url('https://images.unsplash.com/photo-1550966871-3ed3c6227b42?q=80&amp;w=2070&amp;auto=format&amp;fit=crop')] bg-cover bg-center bg-no-repeat bg-fixed relative">
+<!-- Background Overlay for darkening the background image -->
+<div class="absolute inset-0 bg-black/60 backdrop-blur-sm z-0"></div>
+<!-- Main Workflow Container -->
+<div class="relative z-10 w-full max-w-4xl glass-panel rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
+<!-- Header & Progress -->
+<div class="p-6 md:p-8 border-b border-white/10 bg-black/20">
+<div class="flex flex-col gap-4 max-w-2xl mx-auto">
+<div class="flex items-center justify-between text-slate-200">
+<h2 class="text-lg font-bold tracking-tight">Log a Meal</h2>
+<span class="text-sm font-medium text-primary/80">Step 1 of 2</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-white/10 rounded-full h-2">
+<div class="bg-primary h-2 rounded-full transition-all duration-500 ease-out w-1/2 relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg shadow-primary/50"></div>
+</div>
+</div>
+<div class="flex justify-between text-xs font-medium text-slate-400 mt-1">
+<span class="text-primary">Select Venue</span>
+<span>Add Dishes</span>
+</div>
+</div>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10">
+<div class="max-w-2xl mx-auto flex flex-col gap-8">
+<!-- Step 1: Venue Selection -->
+<div class="flex flex-col gap-6 animate-fade-in">
+<div class="text-center space-y-2">
+<h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Where did you eat?</h1>
+<p class="text-slate-400 text-lg">Find the spot to start your review.</p>
+</div>
+<!-- Search Component -->
+<div class="relative group mt-4">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-2xl">search</span>
+</div>
+<input autofocus="" class="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-xl text-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white/10 transition-all-custom shadow-lg" placeholder="Search for a restaurant..." type="text" value="Sushi"/>
+<button class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">cancel</span>
+</button>
+</div>
+<!-- Search Results / Suggestions -->
+<div class="flex flex-col gap-3">
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider pl-1">Top Suggestions</p>
+<!-- Result Item 1 (Selected) -->
+<label class="group relative flex items-center gap-4 p-4 rounded-xl border border-primary bg-primary/10 cursor-pointer transition-all-custom">
+<input checked="" class="peer sr-only" name="venue" type="radio"/>
+<div class="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Sushi platter presentation" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVAND8YcJgambkM9oxMXY52dMbowu2TnzpZMRi6mzorcpZHXNp1cxhKNEZo6C3PY86CUIWro6tQRr5CIcSyYcfQtirZHK8f8lxRWUsNhxHaTjI3QDArrQy0k8MQhqOfn_ssyqtCS0P5MGkoVboah1d-QSNFAcWsIzOQ0ROv3vr_JMVJAKVC4WqVzZQuGLW83WC_MfoTwoKXf-LJNX1S-w-mq94MycJwr3rvTHz4D3MATXpFs7Lo5IU-QFKQ4BoO2Rvlq5rv2TNWdl7"/>
+</div>
+<div class="flex-1">
+<h3 class="text-white font-semibold text-lg group-hover:text-primary transition-colors">Sushi Nakazawa</h3>
+<p class="text-slate-400 text-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                                    New York, NY • $$$$
+                                </p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-slate-600 peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-white text-sm opacity-0 peer-checked:opacity-100">check</span>
+</div>
+</label>
+<!-- Result Item 2 -->
+<label class="group relative flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 cursor-pointer transition-all-custom">
+<input class="peer sr-only" name="venue" type="radio"/>
+<div class="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Modern sushi bar interior" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB93COsVAaJ2JMtpAaSPvZnSaulfbSixTA-pIaoJ_-rYIsKjDEOCnTkubqZExtpm58cFtpLor9l1v2CIUSZghuS1UWOwboK7Fr8KrYGH7_QbEj7iNNm30bS7zmzu0AErh2X4TLFGWdcSnh-sDtjCeIdL3u4aF0LB0vVZtCcH4Rr_InGUtwdnHlsJRcfMGYenV_xVDhz9PLY9cMnwxDjeiRBmLp52toLJkOg6i-b-kt7rGLfK4hJMweu496X83_YewMWwW-xwAyMTRV2"/>
+</div>
+<div class="flex-1">
+<h3 class="text-slate-200 font-semibold text-lg group-hover:text-white transition-colors">Sushi Yasuda</h3>
+<p class="text-slate-500 text-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                                    New York, NY • $$$
+                                </p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-slate-600 peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-white text-sm opacity-0 peer-checked:opacity-100">check</span>
+</div>
+</label>
+<!-- Result Item 3 -->
+<label class="group relative flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 cursor-pointer transition-all-custom">
+<input class="peer sr-only" name="venue" type="radio"/>
+<div class="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Sushi rolls on a plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQuV-OpQLe9dS7fe2aaYMI5tOFJ16MhokIi6uqUE45Jom6DT21Uog5xBja_sAFFP7Cben1xrNmnlQwzR2WyW7T8caPvG8mH0tPnSBOK6Z5mgMyp_HknNuc1wWkBablZL0FKFMJxJffTyj4F_Z2shBH45O8I1zJXiX9hJs_2_Jrzb9dEs41fPeXZ1jOwquaHSSaARg3W0M6TL_tVSnDY76v_phFjIQ9fGNjWnJyQo19O2AJh7helKi_vyP3UUjUINGceBycr7e18tkS"/>
+</div>
+<div class="flex-1">
+<h3 class="text-slate-200 font-semibold text-lg group-hover:text-white transition-colors">Sushi Seki</h3>
+<p class="text-slate-500 text-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                                    New York, NY • $$$
+                                </p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-slate-600 peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-white text-sm opacity-0 peer-checked:opacity-100">check</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Preview of Step 2 (Hidden visually in a real app, but shown here for layout demo purposes, usually would swap content) -->
+<!-- For the purpose of this single page output, I will visually style it as "Next" content block, implying the user would scroll or transition to it -->
+<div class="my-6 border-t border-white/10 pt-6 opacity-40 hover:opacity-100 transition-opacity duration-500 grayscale hover:grayscale-0 pointer-events-none select-none relative">
+<div class="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[2px]">
+<span class="bg-black/50 px-4 py-2 rounded-lg text-sm text-white font-mono border border-white/20">Preview of Next Step</span>
+</div>
+<h2 class="text-2xl font-bold text-white mb-4">What did you have?</h2>
+<div class="rounded-2xl bg-white/5 border border-white/10 p-5 mb-4">
+<div class="flex flex-col md:flex-row gap-5">
+<!-- Photo Upload -->
+<div class="w-full md:w-32 h-32 rounded-xl border-2 border-dashed border-white/20 hover:border-primary/50 bg-white/5 flex flex-col items-center justify-center cursor-pointer transition-colors group">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary text-3xl mb-1">add_a_photo</span>
+<span class="text-xs text-slate-500 group-hover:text-slate-300">Add Photo</span>
+</div>
+<!-- Dish Details -->
+<div class="flex-1 flex flex-col gap-4">
+<div>
+<label class="block text-xs font-medium text-slate-400 mb-1 uppercase tracking-wide">Dish Name</label>
+<input class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="e.g. Omakase Set B" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Sentiment</label>
+<div class="flex gap-3">
+<button class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-primary/20 border border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined text-xl">favorite</span>
+                                            Love it
+                                        </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-400 font-medium hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/50 transition-all">
+<span class="material-symbols-outlined text-xl">heart_broken</span>
+                                            Leave it
+                                        </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-6 border-t border-white/10 bg-black/20 backdrop-blur-md z-20">
+<div class="max-w-2xl mx-auto flex items-center justify-between">
+<button class="flex items-center gap-2 text-slate-400 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-colors font-medium">
+<span class="material-symbols-outlined">arrow_back</span>
+                    Back
+                </button>
+<button class="flex items-center gap-2 bg-primary hover:bg-orange-500 text-white shadow-lg shadow-orange-900/20 px-8 py-3 rounded-xl font-bold transition-all transform active:scale-95">
+                    Next: Add Dishes
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

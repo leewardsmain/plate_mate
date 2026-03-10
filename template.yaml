@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'PlateMate Production Infrastructure'
+
+Parameters:
+  GoogleApiKey:
+    Type: String
+    Description: Google Maps/Places API Key
+    NoEcho: true
+  ProjectName:
+    Type: String
+    Default: platemate
+    Description: Project name for resource naming
+
+Resources:
+
+  # 1. S3 Bucket for the Frontend SPA
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-frontend-${AWS::AccountId}"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+
+  # 2. CloudFront Distribution
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        Origins:
+          - DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            Id: S3Origin
+            S3OriginConfig: {} 
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+            QueryString: false
+          Compress: true
+
+  # 3. DynamoDB Tables
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${ProjectName}-users"
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  ReviewsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${ProjectName}-reviews"
+      AttributeDefinitions:
+        - AttributeName: reviewId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: reviewId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserReviewsIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+
+  RestaurantsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${ProjectName}-restaurants"
+      AttributeDefinitions:
+        - AttributeName: placeId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: placeId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  # 5. Lambda Function (using Serverless Function for SAM features)
+  ApiLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-api-handler"
+      Handler: index.handler
+      Runtime: nodejs20.x
+      CodeUri: ./lambda
+      MemorySize: 512
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RestaurantsTable
+        - S3CrudPolicy:
+            BucketName: !Ref FrontendBucket
+      Environment:
+        Variables:
+          REVIEWS_TABLE: !Ref ReviewsTable
+          USERS_TABLE: !Ref UsersTable
+          AVATAR_BUCKET: !Ref FrontendBucket
+          RESTAURANTS_TABLE: !Ref RestaurantsTable
+          GOOGLE_API_KEY: !Ref GoogleApiKey
+          USE_MOCK_DATA: "false"
+      Events:
+        ProxyResource:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+        RootResource:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+
+Outputs:
+  FrontendBucketName:
+    Value: !Ref FrontendBucket
+    Description: Name of the Amazon S3 bucket used for frontend hosting.
+  CloudFrontDomain:
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Description: Domain name of the CloudFront distribution for the frontend.
+  CloudFrontDistributionId:
+    Value: !Ref CloudFrontDistribution
+    Description: ID of the CloudFront distribution.
+  ApiEndpoint:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Description: production URL of the API Gateway endpoint.

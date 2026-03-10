@@ -1,0 +1,188 @@
+/* EditReviewModal specific styles */
+
+.fieldGroup {
+    margin-bottom: 1.5rem;
+}
+
+.textArea {
+    width: 100%;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.925rem;
+    line-height: 1.6;
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.textArea:focus {
+    border-color: var(--primary);
+}
+
+.sectionLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+}
+
+.dishRow {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.dishThumb {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.5rem;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.dishInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.dishName {
+    font-weight: 600;
+    color: var(--slate-200);
+    font-size: 0.925rem;
+}
+
+.deleteDishBtn {
+    background: transparent;
+    border: none;
+    color: var(--slate-500);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.deleteDishBtn:hover {
+    color: var(--red-500);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Custom Confirmation Modal */
+.confirmOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1.5rem;
+}
+
+.confirmModal {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.confirmIcon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+}
+
+.confirmIcon span {
+    font-size: 2rem;
+}
+
+.confirmTitle {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.confirmText {
+    color: var(--slate-400);
+    font-size: 0.925rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.confirmActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.cancelBtn {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelBtn:hover {
+    background: var(--glass-border);
+}
+
+.confirmDeleteBtn {
+    flex: 1;
+    padding: 0.75rem;
+    background: #ef4444;
+    border: none;
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.confirmDeleteBtn:hover {
+    background: #dc2626;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

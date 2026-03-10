@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+:root {
+  --primary: #f49d25;
+  --primary-transparent: rgba(244, 157, 37, 0.2);
+  --bg-light: #f8f7f5;
+  --bg-dark: #0f0f0f;
+  --bg-dark-transparent: rgba(15, 15, 15, 0);
+
+  --glass-surface: rgba(30, 30, 30, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-hover: rgba(255, 255, 255, 0.05);
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-on-primary: #0f0f0f;
+
+  --tag-primary-bg: rgba(244, 157, 37, 0.2);
+  --tag-primary-text: var(--primary);
+  --tag-primary-border: rgba(244, 157, 37, 0.1);
+  --tag-secondary-bg: rgba(255, 255, 255, 0.05);
+  --tag-secondary-text: var(--slate-300);
+  --tag-secondary-border: rgba(255, 255, 255, 0.1);
+
+  --tag-blue-bg: rgba(59, 130, 246, 0.1);
+  --tag-blue-text: #3b82f6;
+  --tag-blue-border: rgba(59, 130, 246, 0.2);
+
+  --tag-purple-bg: rgba(168, 85, 247, 0.1);
+  --tag-purple-text: #a855f7;
+  --tag-purple-border: rgba(168, 85, 247, 0.2);
+
+  --tag-red-bg: rgba(239, 68, 68, 0.1);
+  --tag-red-text: var(--red-400);
+  --tag-red-border: rgba(239, 68, 68, 0.2);
+
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --blue-400: #60a5fa;
+
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[data-theme="light"] {
+  --bg-dark: #ffffff;
+  --bg-dark-transparent: rgba(255, 255, 255, 0);
+  --slate-50: #0f172a;
+  /* Darkest */
+  --slate-100: #1e293b;
+  --slate-200: #334155;
+  --slate-300: #475569;
+  --slate-400: #64748b;
+  --slate-500: #94a3b8;
+  --slate-600: #cbd5e1;
+  --slate-700: #e2e8f0;
+  --slate-800: #f1f5f9;
+  --slate-900: #f8fafc;
+  /* Lightest */
+
+  --glass-surface: linear-gradient(135deg, #fffaf5 0%, #fdf2e9 100%);
+  /* Frosted glass yellowish gradient */
+  --glass-border: rgba(244, 157, 37, 0.15);
+  /* Primary tinted subtle border */
+  --glass-hover: linear-gradient(135deg, #fef4ea 0%, #fce7d2 100%);
+  /* Slightly more intense on hover */
+  --card-shadow: 0 10px 40px -10px rgba(244, 157, 37, 0.15), 0 8px 10px -6px rgba(244, 157, 37, 0.05);
+
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-on-primary: #1e293b;
+
+  --tag-primary-bg: rgba(244, 157, 37, 0.15);
+  --tag-primary-text: #b85c00;
+  --tag-primary-border: rgba(244, 157, 37, 0.3);
+  --tag-secondary-bg: rgba(0, 0, 0, 0.05);
+  --tag-secondary-text: var(--text-secondary);
+  --tag-secondary-border: rgba(0, 0, 0, 0.1);
+
+  --tag-blue-bg: rgba(59, 130, 246, 0.15);
+  --tag-blue-text: #1d4ed8;
+  --tag-blue-border: rgba(59, 130, 246, 0.3);
+
+  --tag-purple-bg: rgba(168, 85, 247, 0.15);
+  --tag-purple-text: #7e22ce;
+  --tag-purple-border: rgba(168, 85, 247, 0.3);
+
+  --tag-red-bg: rgba(239, 68, 68, 0.15);
+  --tag-red-text: #b91c1c;
+  --tag-red-border: rgba(239, 68, 68, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-display);
+  background: var(--bg-dark);
+  /* Changed from background-color to support gradients */
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.3);
+}
+
+/* Glass Utilities */
+.glass-panel {
+  background: var(--glass-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: var(--glass-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-card:hover {
+  background: var(--glass-hover);
+  border-color: rgba(128, 128, 128, 0.1);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

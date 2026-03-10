@@ -1,0 +1,351 @@
+{
+  "C:\\Users\\Owner\\OneDrive\\Documents\\GitHub\\plate_mate\\template.yaml": {
+    "versionFramework": "4.33.0",
+    "servicePath": "C:\\Users\\Owner\\OneDrive\\Documents\\GitHub\\plate_mate\\template.yaml",
+    "serviceConfigFileName": "template.yaml",
+    "service": {
+      "AWSTemplateFormatVersion": "2010-09-09",
+      "Description": "PlateMate Base Infrastructure (LocalStack Compatible)",
+      "Resources": {
+        "FrontendBucket": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "platemate-frontend-app"
+          }
+        },
+        "CloudFrontDistribution": {
+          "Type": "AWS::CloudFront::Distribution",
+          "Properties": {
+            "DistributionConfig": {
+              "Enabled": true,
+              "DefaultRootObject": "index.html",
+              "CustomErrorResponses": [
+                {
+                  "ErrorCode": 403,
+                  "ResponseCode": 200,
+                  "ResponsePagePath": "/index.html"
+                },
+                {
+                  "ErrorCode": 404,
+                  "ResponseCode": 200,
+                  "ResponsePagePath": "/index.html"
+                }
+              ],
+              "Origins": [
+                {
+                  "DomainName": {
+                    "Fn::GetAtt": [
+                      "FrontendBucket",
+                      "RegionalDomainName"
+                    ]
+                  },
+                  "Id": "S3Origin",
+                  "S3OriginConfig": {}
+                }
+              ],
+              "DefaultCacheBehavior": {
+                "TargetOriginId": "S3Origin",
+                "ViewerProtocolPolicy": "redirect-to-https",
+                "ForwardedValues": {
+                  "QueryString": false
+                }
+              }
+            }
+          }
+        },
+        "UsersTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "platemate-users",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "userId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "userId",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        },
+        "ReviewsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "platemate-reviews",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "reviewId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "userId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "reviewId",
+                "KeyType": "HASH"
+              }
+            ],
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "UserReviewsIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "userId",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        },
+        "RestaurantsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "platemate-restaurants",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "placeId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "placeId",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        },
+        "LambdaExecutionRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "lambda.amazonaws.com"
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": "DynamoDBAccess",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:PutItem",
+                        "dynamodb:GetItem",
+                        "dynamodb:Scan",
+                        "dynamodb:Query"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "ApiLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "FunctionName": "platemate-api-handler",
+            "Handler": "index.handler",
+            "Role": {
+              "Fn::GetAtt": [
+                "LambdaExecutionRole",
+                "Arn"
+              ]
+            },
+            "Runtime": "nodejs20.x",
+            "Code": {
+              "S3Bucket": {
+                "Ref": "FrontendBucket"
+              },
+              "S3Key": "lambda.zip"
+            },
+            "Environment": {
+              "Variables": {
+                "REVIEWS_TABLE": {
+                  "Ref": "ReviewsTable"
+                },
+                "USERS_TABLE": {
+                  "Ref": "UsersTable"
+                },
+                "AVATAR_BUCKET": {
+                  "Ref": "FrontendBucket"
+                },
+                "RESTAURANTS_TABLE": {
+                  "Ref": "RestaurantsTable"
+                },
+                "GOOGLE_API_KEY": "<REDACTED>",
+                "USE_MOCK_DATA": "true"
+              }
+            }
+          }
+        },
+        "RestApi": {
+          "Type": "AWS::ApiGateway::RestApi",
+          "Properties": {
+            "Name": "platemate-rest-api",
+            "Description": "API for PlateMate"
+          }
+        },
+        "ApiGatewayResource": {
+          "Type": "AWS::ApiGateway::Resource",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "RestApi"
+            },
+            "ParentId": {
+              "Fn::GetAtt": [
+                "RestApi",
+                "RootResourceId"
+              ]
+            },
+            "PathPart": "{proxy+}"
+          }
+        },
+        "ApiGatewayMethod": {
+          "Type": "AWS::ApiGateway::Method",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "RestApi"
+            },
+            "ResourceId": {
+              "Ref": "ApiGatewayResource"
+            },
+            "HttpMethod": "ANY",
+            "AuthorizationType": "NONE",
+            "Integration": {
+              "Type": "AWS_PROXY",
+              "IntegrationHttpMethod": "POST",
+              "Uri": {
+                "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiLambdaFunction.Arn}/invocations"
+              }
+            }
+          }
+        },
+        "ApiGatewayRootMethod": {
+          "Type": "AWS::ApiGateway::Method",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "RestApi"
+            },
+            "ResourceId": {
+              "Fn::GetAtt": [
+                "RestApi",
+                "RootResourceId"
+              ]
+            },
+            "HttpMethod": "ANY",
+            "AuthorizationType": "NONE",
+            "Integration": {
+              "Type": "AWS_PROXY",
+              "IntegrationHttpMethod": "POST",
+              "Uri": {
+                "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiLambdaFunction.Arn}/invocations"
+              }
+            }
+          }
+        },
+        "ApiGatewayDeployment": {
+          "Type": "AWS::ApiGateway::Deployment",
+          "DependsOn": [
+            "ApiGatewayMethod",
+            "ApiGatewayRootMethod"
+          ],
+          "Properties": {
+            "RestApiId": {
+              "Ref": "RestApi"
+            }
+          }
+        },
+        "ApiGatewayStage": {
+          "Type": "AWS::ApiGateway::Stage",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "RestApi"
+            },
+            "DeploymentId": {
+              "Ref": "ApiGatewayDeployment"
+            },
+            "StageName": "dev"
+          }
+        },
+        "LambdaApiPermission": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "Action": "lambda:InvokeFunction",
+            "FunctionName": {
+              "Ref": "ApiLambdaFunction"
+            },
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*"
+            }
+          }
+        }
+      },
+      "Outputs": {
+        "FrontendBucketName": {
+          "Value": {
+            "Ref": "FrontendBucket"
+          },
+          "Description": "Name of the Amazon S3 bucket used for frontend hosting."
+        },
+        "CloudFrontDomain": {
+          "Value": {
+            "Fn::GetAtt": [
+              "CloudFrontDistribution",
+              "DomainName"
+            ]
+          },
+          "Description": "Domain name of the CloudFront distribution for the frontend."
+        },
+        "ApiEndpoint": {
+          "Value": {
+            "Fn::Sub": "http://localhost:4566/restapis/${RestApi}/dev/_user_request_"
+          },
+          "Description": "Local URL of the test API Gateway endpoint."
+        }
+      }
+    },
+    "error": {
+      "message": "You must sign in or use a license key with Serverless Framework V.4 and later versions. Please use \"serverless login\".",
+      "stack": "Error: You must sign in or use a license key with Serverless Framework V.4 and later versions. Please use \"serverless login\".\n    at Authentication.getAuthenticatedData (file:///C:/Users/Owner/.serverless/releases/4.33.0/package/dist/sf-core.js:891:11566)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Authentication.authenticate (file:///C:/Users/Owner/.serverless/releases/4.33.0/package/dist/sf-core.js:894:4133)\n    at async CfnRunner.resolveVariablesAndAuthenticate (file:///C:/Users/Owner/.serverless/releases/4.33.0/package/dist/sf-core.js:902:2394)\n    at async CfnRunner.run (file:///C:/Users/Owner/.serverless/releases/4.33.0/package/dist/sf-core.js:1456:3028)\n    at async route (file:///C:/Users/Owner/.serverless/releases/4.33.0/package/dist/sf-core.js:2519:2848)\n    at async Object.run (file:///C:/Users/Owner/.serverless/releases/4.33.0/package/dist/sf-core.js:2520:3886)\n    at async run2 (file:///C:/Users/Owner/.serverless/releases/4.33.0/package/dist/sf-core.js:2520:5040)"
+    },
+    "serviceRawFile": "AWSTemplateFormatVersion: '2010-09-09'\r\nDescription: 'PlateMate Base Infrastructure (LocalStack Compatible)'\r\n\r\nResources:\r\n\r\n  # 1. S3 Bucket for the Frontend SPA\r\n  FrontendBucket:\r\n    Type: AWS::S3::Bucket\r\n    Properties:\r\n      BucketName: platemate-frontend-app\r\n\r\n  # 2. CloudFront Distribution (LocalStack will just mock this successfully without error)\r\n  # We associate it with the bucket created above\r\n  CloudFrontDistribution:\r\n    Type: AWS::CloudFront::Distribution\r\n    Properties:\r\n      DistributionConfig:\r\n        Enabled: true\r\n        DefaultRootObject: index.html\r\n        CustomErrorResponses:\r\n          # This is critical for React Router (SPA routing)\r\n          - ErrorCode: 403\r\n            ResponseCode: 200\r\n            ResponsePagePath: /index.html\r\n          - ErrorCode: 404\r\n            ResponseCode: 200\r\n            ResponsePagePath: /index.html\r\n        Origins:\r\n          - DomainName: !GetAtt FrontendBucket.RegionalDomainName\r\n            Id: S3Origin\r\n            S3OriginConfig: {} # In a real deploy, we'd use Origin Access Control (OAC)\r\n        DefaultCacheBehavior:\r\n          TargetOriginId: S3Origin\r\n          ViewerProtocolPolicy: redirect-to-https\r\n          ForwardedValues:\r\n            QueryString: false\r\n\r\n  # 3. DynamoDB Tables\r\n  UsersTable:\r\n    Type: AWS::DynamoDB::Table\r\n    Properties:\r\n      TableName: platemate-users\r\n      AttributeDefinitions:\r\n        - AttributeName: userId\r\n          AttributeType: S\r\n      KeySchema:\r\n        - AttributeName: userId\r\n          KeyType: HASH\r\n      BillingMode: PAY_PER_REQUEST\r\n\r\n  ReviewsTable:\r\n    Type: AWS::DynamoDB::Table\r\n    Properties:\r\n      TableName: platemate-reviews\r\n      AttributeDefinitions:\r\n        - AttributeName: reviewId\r\n          AttributeType: S\r\n        - AttributeName: userId\r\n          AttributeType: S\r\n      KeySchema:\r\n        - AttributeName: reviewId\r\n          KeyType: HASH\r\n      GlobalSecondaryIndexes:\r\n        - IndexName: UserReviewsIndex\r\n          KeySchema:\r\n            - AttributeName: userId\r\n              KeyType: HASH\r\n          Projection:\r\n            ProjectionType: ALL\r\n      BillingMode: PAY_PER_REQUEST\r\n\r\n  RestaurantsTable:\r\n    Type: AWS::DynamoDB::Table\r\n    Properties:\r\n      TableName: platemate-restaurants\r\n      AttributeDefinitions:\r\n        - AttributeName: placeId\r\n          AttributeType: S\r\n      KeySchema:\r\n        - AttributeName: placeId\r\n          KeyType: HASH\r\n      BillingMode: PAY_PER_REQUEST\r\n\r\n  # 4. IAM Role for Lambda\r\n  LambdaExecutionRole:\r\n    Type: AWS::IAM::Role\r\n    Properties:\r\n      AssumeRolePolicyDocument:\r\n        Version: '2012-10-17'\r\n        Statement:\r\n          - Effect: Allow\r\n            Principal:\r\n              Service: lambda.amazonaws.com\r\n            Action: sts:AssumeRole\r\n      Policies:\r\n        - PolicyName: DynamoDBAccess\r\n          PolicyDocument:\r\n            Version: '2012-10-17'\r\n            Statement:\r\n              - Effect: Allow\r\n                Action:\r\n                  - dynamodb:PutItem\r\n                  - dynamodb:GetItem\r\n                  - dynamodb:Scan\r\n                  - dynamodb:Query\r\n                Resource: \"*\"\r\n\r\n  # 5. Lambda Function\r\n  ApiLambdaFunction:\r\n    Type: AWS::Lambda::Function\r\n    Properties:\r\n      FunctionName: platemate-api-handler\r\n      Handler: index.handler\r\n      Role: !GetAtt LambdaExecutionRole.Arn\r\n      Runtime: nodejs20.x\r\n      Code:\r\n        S3Bucket: !Ref FrontendBucket\r\n        S3Key: lambda.zip\r\n      Environment:\r\n        Variables:\r\n          REVIEWS_TABLE: !Ref ReviewsTable\r\n          USERS_TABLE: !Ref UsersTable\r\n          AVATAR_BUCKET: !Ref FrontendBucket\r\n          RESTAURANTS_TABLE: !Ref RestaurantsTable\r\n          GOOGLE_API_KEY: \"AIzaSyCc6dbp4JMtFEzL3d1VR3bymT-1hj4gt1A\"\r\n          # Mock data flag for local testing if needed\r\n          USE_MOCK_DATA: \"true\"\r\n\r\n\r\n\r\n  # 6. API Gateway (REST API v1 for LocalStack Free Tier compatibility)\r\n  RestApi:\r\n    Type: AWS::ApiGateway::RestApi\r\n    Properties:\r\n      Name: platemate-rest-api\r\n      Description: API for PlateMate\r\n\r\n  ApiGatewayResource:\r\n    Type: AWS::ApiGateway::Resource\r\n    Properties:\r\n      RestApiId: !Ref RestApi\r\n      ParentId: !GetAtt RestApi.RootResourceId\r\n      PathPart: \"{proxy+}\"\r\n\r\n  ApiGatewayMethod:\r\n    Type: AWS::ApiGateway::Method\r\n    Properties:\r\n      RestApiId: !Ref RestApi\r\n      ResourceId: !Ref ApiGatewayResource\r\n      HttpMethod: ANY\r\n      AuthorizationType: NONE\r\n      Integration:\r\n        Type: AWS_PROXY\r\n        IntegrationHttpMethod: POST\r\n        Uri: !Sub \"arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiLambdaFunction.Arn}/invocations\"\r\n\r\n  ApiGatewayRootMethod:\r\n    Type: AWS::ApiGateway::Method\r\n    Properties:\r\n      RestApiId: !Ref RestApi\r\n      ResourceId: !GetAtt RestApi.RootResourceId\r\n      HttpMethod: ANY\r\n      AuthorizationType: NONE\r\n      Integration:\r\n        Type: AWS_PROXY\r\n        IntegrationHttpMethod: POST\r\n        Uri: !Sub \"arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiLambdaFunction.Arn}/invocations\"\r\n\r\n  ApiGatewayDeployment:\r\n    Type: AWS::ApiGateway::Deployment\r\n    DependsOn:\r\n      - ApiGatewayMethod\r\n      - ApiGatewayRootMethod\r\n    Properties:\r\n      RestApiId: !Ref RestApi\r\n\r\n  ApiGatewayStage:\r\n    Type: AWS::ApiGateway::Stage\r\n    Properties:\r\n      RestApiId: !Ref RestApi\r\n      DeploymentId: !Ref ApiGatewayDeployment\r\n      StageName: dev\r\n\r\n  LambdaApiPermission:\r\n    Type: AWS::Lambda::Permission\r\n    Properties:\r\n      Action: lambda:InvokeFunction\r\n      FunctionName: !Ref ApiLambdaFunction\r\n      Principal: apigateway.amazonaws.com\r\n      SourceArn: !Sub \"arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*\"\r\n\r\n\r\n\r\nOutputs:\r\n  FrontendBucketName:\r\n    Value: !Ref FrontendBucket\r\n    Description: Name of the Amazon S3 bucket used for frontend hosting.\r\n  CloudFrontDomain:\r\n    Value: !GetAtt CloudFrontDistribution.DomainName\r\n    Description: Domain name of the CloudFront distribution for the frontend.\r\n  ApiEndpoint:\r\n    Value: !Sub \"http://localhost:4566/restapis/${RestApi}/dev/_user_request_\"\r\n\r\n    Description: Local URL of the test API Gateway endpoint.\r\n",
+    "command": [
+      "logs"
+    ],
+    "options": {
+      "f": "ApiLambdaFunction",
+      "t": true
+    },
+    "serviceProviderAwsCfStackId": null,
+    "serviceProviderAwsCfStackCreated": null,
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": null,
+    "serviceProviderAwsCfStackOutputs": null
+  }
+}

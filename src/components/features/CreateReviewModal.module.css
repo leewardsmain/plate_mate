@@ -1,0 +1,451 @@
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modalContent {
+    width: 100%;
+    max-width: 48rem;
+    background: var(--bg-dark);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+    background: var(--glass-surface);
+}
+
+@media (min-width: 640px) {
+    .header {
+        padding: 1.5rem 2rem;
+    }
+}
+
+.headerTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--slate-200);
+}
+
+.stepIndicator {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--primary);
+    opacity: 0.8;
+}
+
+.closeButton {
+    color: var(--slate-400);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.closeButton:hover {
+    color: var(--text-primary);
+}
+
+.progressBarContainer {
+    width: 100%;
+    height: 0.5rem;
+    background: var(--glass-border);
+    border-radius: 9999px;
+    margin-bottom: 0.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.progressBar {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 9999px;
+    transition: width 0.5s ease-out;
+}
+
+.stepLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--slate-400);
+}
+
+.body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .body {
+        padding: 2rem;
+    }
+}
+
+/* Step 1 */
+.stepContainer {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stepTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .stepTitle {
+        font-size: 2.25rem;
+    }
+}
+
+.stepSubtitle {
+    color: var(--slate-400);
+    text-align: center;
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+}
+
+.searchInputWrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+}
+
+.searchInput {
+    width: 100%;
+    height: 3.5rem;
+    padding-left: 3rem;
+    padding-right: 1rem;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.searchInput:focus {
+    border-color: var(--primary);
+    background: var(--glass-border);
+}
+
+.suggestionsLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    padding-left: 0.25rem;
+}
+
+.venueItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--glass-surface);
+    background: var(--glass-surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0.75rem;
+}
+
+.venueItem:hover {
+    background: var(--glass-border);
+}
+
+.venueItem.selected {
+    border-color: var(--primary);
+    background: rgba(244, 157, 37, 0.1);
+}
+
+.venueImage {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    background-size: cover;
+    background-position: center;
+}
+
+.venueInfo {
+    flex: 1;
+}
+
+.venueName {
+    color: var(--slate-200);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.125rem;
+}
+
+.venueItem.selected .venueName {
+    color: var(--primary);
+}
+
+.venueLocation {
+    color: var(--slate-500);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.venueCheck {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--slate-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.venueItem.selected .venueCheck {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.venueItem.selected .venueCheck .checkIcon {
+    opacity: 1;
+}
+
+.checkIcon {
+    opacity: 0;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+/* Step 2: Add Dishes */
+.dishCard {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .dishCard {
+        flex-direction: row;
+    }
+}
+
+.photoUpload {
+    width: 100%;
+    height: 8rem;
+    border: 2px dashed var(--slate-400);
+    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: var(--glass-surface);
+    transition: all 0.2s;
+    color: var(--slate-400);
+}
+
+@media (min-width: 768px) {
+    .photoUpload {
+        width: 8rem;
+    }
+}
+
+.photoUpload:hover {
+    border-color: rgba(244, 157, 37, 0.5);
+    color: var(--primary);
+}
+
+.dishDetails {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.inputLabel {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.dishInput {
+    width: 100%;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.dishInput:focus {
+    border-color: var(--primary);
+}
+
+.sentimentRow {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.sentimentBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-surface);
+    color: var(--slate-400);
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.sentimentBtn.love.active {
+    background: rgba(244, 157, 37, 0.2);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.sentimentBtn.leave.active {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: var(--red-500);
+    color: var(--red-400);
+}
+
+.addDishBtn {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px dashed var(--glass-border);
+    border-radius: 0.75rem;
+    color: var(--slate-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    background: transparent;
+    cursor: pointer;
+}
+
+.addDishBtn:hover {
+    background: var(--glass-surface);
+    border-color: var(--slate-400);
+    color: var(--text-primary);
+}
+
+/* Footer */
+.footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--glass-border);
+    background: var(--glass-surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (min-width: 640px) {
+    .footer {
+        padding: 1.5rem 2rem;
+    }
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--slate-400);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.backBtn:hover {
+    background: var(--glass-surface);
+    color: var(--text-primary);
+}
+
+.nextBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary);
+    color: var(--text-on-primary);
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    border-radius: 0.75rem;
+    transition: transform 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.nextBtn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.nextBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

@@ -1,0 +1,141 @@
+.container {
+    padding: 1rem;
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .container {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        padding: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+}
+
+.header {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--slate-800);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--slate-100);
+    margin-bottom: 0.5rem;
+}
+
+.location {
+    color: var(--primary);
+}
+
+.subtitle {
+    color: var(--slate-400);
+    font-size: 1.1rem;
+}
+
+.resultsGrid {
+    display: grid;
+    gap: 1rem;
+}
+
+.resultCard {
+    background: var(--slate-800);
+    border: 1px solid var(--slate-700);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.resultCard:hover {
+    border-color: var(--primary);
+    background: var(--slate-750);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.cardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.restaurantName {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--slate-100);
+}
+
+.restaurantAddress {
+    color: var(--slate-400);
+    font-size: 0.9rem;
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.rating span.material-symbols-outlined {
+    font-size: 18px;
+    font-variation-settings: 'FILL' 1;
+}
+
+.price {
+    color: var(--slate-500);
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+.open {
+    color: #10b981;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.closed {
+    color: #ef4444;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.chevron {
+    color: var(--slate-600);
+    font-size: 24px;
+}
+
+.noResults {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--slate-500);
+}
+
+.noResults span.material-symbols-outlined {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+}
+
+.noResults h2 {
+    color: var(--slate-300);
+    margin-bottom: 0.5rem;
+}

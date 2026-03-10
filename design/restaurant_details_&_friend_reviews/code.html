@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PlateMate - Restaurant Details</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#f49d25",
+              "background-light": "#f8f7f5",
+              "background-dark": "#221a10",
+              "glass-border": "rgba(255, 255, 255, 0.08)",
+              "glass-bg": "rgba(255, 255, 255, 0.03)",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            backdropBlur: {
+              'xs': '2px',
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        /* Custom scrollbar for horizontal scrolling sections */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col antialiased">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 w-full border-b border-glass-border bg-background-dark/80 backdrop-blur-md">
+<div class="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
+<div class="flex items-center gap-10">
+<div class="flex items-center gap-3 text-white">
+<div class="text-primary">
+<span class="material-symbols-outlined" style="font-size: 32px;">restaurant_menu</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight">PlateMate</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium" href="#">Home</a>
+<a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium" href="#">My Ledger</a>
+<a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium" href="#">Community</a>
+<a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium" href="#">Profile</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:flex relative group">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">search</span>
+</div>
+<input class="block w-full rounded-full border-0 bg-glass-bg py-2 pl-10 pr-4 text-slate-200 ring-1 ring-inset ring-glass-border placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 transition-all" placeholder="Search places..." type="text"/>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-2 px-4 rounded-full text-sm transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 20px;">add_circle</span>
+                    Log a Visit
+                </button>
+<div class="h-10 w-10 rounded-full bg-cover bg-center ring-2 ring-glass-border cursor-pointer" data-alt="User profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCmadaqZh8vHtUxnhRTUsxuALmjbR_jwmw6c3978qZA27AX0qJ3-iqifFA95KFlqZplWJq6OBWA8lg-LM9vPf5AEjBYAJdBtafwArRpjGfMQq8BNvzne9u82kRzlOpVuA3crv-RyoM7ka-0LeETKF2LJcsLXO6WtFeJuQaakQs9FcgYIgr0Y2hgA3cb_5X4Ryf-LPIY_IT7jh3qwpHNTyCoFtg0w0xUCA6xqFFxIj9C-dFc59cmVDYLREJxhyU8G6g0RNn9GYxWc_7o');"></div>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+<!-- Hero Section -->
+<section class="relative rounded-2xl overflow-hidden min-h-[400px] flex items-end group">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Warmly lit rustic restaurant interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBXOeOqBRkhqgCmCstHNh_p8oCFc_78rhwuRmZVYpiiTJ7RUzGy4sA2JowtLvDtIxukKt-X8THe-1VScTAzpRytZAo4ngrnY3JIFNfwt4ZTQbs--MzfDDGYSdi6B-lpI8PlFPFYBYWZaZ20yV1UaPnlQsbc0V4BICvhzw7Z1K5QBKRPkOoF8di3rQ52mfA8u0tZI0MeUTqCzD_MUTNCzHyvi5MnwIs0sShgQ-82u1cbqNNxcjIKwHRuS2N6JEX_0stZVz4SXtfmSW0f');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/60 to-transparent"></div>
+<div class="relative z-10 p-6 sm:p-10 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider backdrop-blur-md border border-primary/10">Italian</span>
+<span class="px-3 py-1 rounded-full bg-glass-bg text-slate-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md border border-glass-border">$$$</span>
+</div>
+<h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight">Lucali</h1>
+<div class="flex items-center gap-2 text-slate-300">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">location_on</span>
+<span>575 Henry St, Brooklyn, NY</span>
+<span class="mx-2 text-slate-600">•</span>
+<span>Open until 11 PM</span>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-glass-bg backdrop-blur-lg border border-glass-border p-4 rounded-xl">
+<div class="flex flex-col items-center justify-center bg-primary text-background-dark font-black text-2xl h-14 w-14 rounded-lg leading-none">
+                        9.4
+                    </div>
+<div class="flex flex-col">
+<span class="text-white font-bold">Excellent Score</span>
+<span class="text-slate-400 text-sm">Based on 42 Circle reviews</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Reviews & Dishes -->
+<div class="lg:col-span-8 space-y-10">
+<!-- Circle Favorites Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">favorite</span>
+                            Circle Favorites
+                        </h2>
+<a class="text-primary text-sm font-medium hover:text-primary/80" href="#">View all</a>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4 snap-x">
+<!-- Card 1 -->
+<div class="min-w-[280px] bg-glass-bg border border-glass-border rounded-xl overflow-hidden snap-center hover:border-primary/50 transition-colors group">
+<div class="h-40 bg-cover bg-center relative" data-alt="Pepperoni pizza slice" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDLpElB7EzECMp_TnDj4FGgSx7SgKTM-J8bOF4lNpKSIshDlDZ0gi2HfR4QL_BjPyrSJ5pKYZyz_9LPt6VEmpdgGqWBsMAvlkcuWgTg75b95OfTv9yoh4eeHQkHbGmYutaODrwE09NYXdHQaGG0ehHrU2Vlfmduw0bRGSTAhM_fSRxU5W7yYbGgyBu0kuqbimA29WimdaS2ehW7q76Pe6GkA_eJ5NqGOLzIk5cggnABBlerDR6cxaVZ2wSV4XSKtJe1z-SEPsn5c5Xk');">
+<div class="absolute top-2 right-2 bg-background-dark/80 backdrop-blur-sm text-primary px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">star</span> 9.8
+                                </div>
+</div>
+<div class="p-4 space-y-3">
+<h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors">Pepperoni Pie</h3>
+<div class="flex items-center -space-x-2">
+<img alt="Friend avatar" class="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark" data-alt="Male smiling avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC00DL6gFhNczpbXnaGGgNHOrWML6tVXmRLJU1MofO7yrL-5eBFzAvhD1VwSYvR6GyJlnC3n8qzIiracpdQ2q5WJEvpGeLqJC6XbHopJbcIAcKG5XF4tPsfBiyrwQEgIqhcWop1615dUFUj-0cHDa6F5J0hGvmns5ASG3TTzwY0J16V3dAM0DTUQuDdGsMPiJSnZngtYQBaaL_Bb0yGNkCNCwSHEALCkOJer9U2K2bFRF59wm4zblkj4pA8wm3wGXnDS0tVaPa7mrJF"/>
+<img alt="Friend avatar" class="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark" data-alt="Female smiling avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzFL0fjEDGz3o7unlzjfd2phmUrIWCwwglLze96HbmIFno62gRTI3pS7FSNv0I_UkD9FHgJGZJKup_a-l_3zhJT12OcDQk6i5BVuMxNMZbVoRzJpoRILnSHOxga0A9Ls5pEBOZiP49wP05shSTCTBzRx7WQcHsiIvab7uFyDK7tmYNx5YsIpdXIOF54lqXaYsUvvuHBfeM9qkgWsf0VlMgMj1GIDoo8fq1ZO91LbrI64REc9zDnyhY6fGILZR_uz6oE5I9UKhpO0g3"/>
+<div class="h-8 w-8 rounded-full ring-2 ring-background-dark bg-slate-700 flex items-center justify-center text-xs text-white font-medium">+4</div>
+</div>
+<p class="text-slate-400 text-sm">"Absolutely iconic crust. Must try."</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="min-w-[280px] bg-glass-bg border border-glass-border rounded-xl overflow-hidden snap-center hover:border-primary/50 transition-colors group">
+<div class="h-40 bg-cover bg-center relative" data-alt="Golden baked calzone" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuALPlxMqwKpeRAvSk1LMJ_93TRB2C1v249Uuzvy2GcBCyr0Jd23qk6uSUVxxFfXCSL8pUHpWaDtWUaWQVwk9HQ9baODVeuemzN1_MihEiD8ZTf6TbEk6X9DhPL5n16P5C22PYRta6vvCKXFsnGJ_84rW9ilKDwp3svgkXtgUQqsKqnukj-ycaf0LnInpnoTJ_lbwav0zB5GsZxD5XgZhlm24yEwpssb9tXvJvmyEfpV1451irxneefTIGiH-OqOuwCd3SUAjmYlrBpU');">
+<div class="absolute top-2 right-2 bg-background-dark/80 backdrop-blur-sm text-primary px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">star</span> 9.5
+                                </div>
+</div>
+<div class="p-4 space-y-3">
+<h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors">Calzone</h3>
+<div class="flex items-center -space-x-2">
+<img alt="Friend avatar" class="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark" data-alt="Female avatar smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTiUmgwJ4xpPkHmstb4QaBYN18PWZ91k2P-vGd39rz6PsySHq1Yv10Gj3i8A3GUy5FO3qYDjZUTIvdKMT6Jrh15Q1eIYI9F31ho8N6ukCnsCblELvmtsPgEL9Q_-GS1k8oTNHCMctr0Ts4pQjXLQvLJJGfTZtlFSogXQNRlu3dd852RB98sJBK-XzOr2VLdtm-ofb3WRUTs7VGYVGshPLaAnbA9uKhHhBSCn0zVP0PWdOarHwFqvkLqZPulsNlrkjidM9019dTEUW8"/>
+<div class="h-8 w-8 rounded-full ring-2 ring-background-dark bg-slate-700 flex items-center justify-center text-xs text-white font-medium">+2</div>
+</div>
+<p class="text-slate-400 text-sm">"Sarah recommends this strongly."</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="min-w-[280px] bg-glass-bg border border-glass-border rounded-xl overflow-hidden snap-center hover:border-primary/50 transition-colors group">
+<div class="h-40 bg-cover bg-center relative" data-alt="Meatballs with marinara sauce" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAkMhGydOzlH7mAQzAIs3LWlqI3GX0sYuJ5QVq4Ys0MLU5Z-Zv9higSVvq9su8AWPnwoAOB1Sm3THzcChK5ZwSWZv0S7LT_SvjzznMCPltnC8qKsCZV5XCP2zlv5-dePN2g1fdy7xtPiiBST6QuK16_6FUP8sWP4XZ8lacU-59gtD-t3tRvmdFQeuGiGMga18fUs1Meizrs20iOSouHzcxy5bm36Txb6NJ55WMWh40wzpk0NjPxy0vPrXpRnAWfILRqhz8x6Wd3Z5cU');">
+<div class="absolute top-2 right-2 bg-background-dark/80 backdrop-blur-sm text-primary px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">star</span> 9.2
+                                </div>
+</div>
+<div class="p-4 space-y-3">
+<h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors">Meatballs</h3>
+<div class="flex items-center -space-x-2">
+<img alt="Friend avatar" class="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark" data-alt="Male avatar glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCApFPXRAF1gAhYH92NxY0ahbv3mwaIOiUMZc66FB13RS_FO1jN3uZMf_CgB1A-mrq2IDV5dFtL_n-2-e9Sa5Dj400X9_UdW74X8_sv8oPFr9iNeuCYMfXFwut-fXAJL8ulpYW-3-qwnnUKuC1-uIgHVqK6ujA9yJKBLRxcOqVNaqnAk9QSghh4OMuqVSrmcqm4HPzLffgRTgMee7PI2J_L2E2_0pjaUK2ss5Hd-OBAJDNOIBOtdVx3wu37q3lw450heFOQAvE_Ojpr"/>
+</div>
+<p class="text-slate-400 text-sm">"Perfect appetizer size."</p>
+</div>
+</div>
+</div>
+</section>
+<!-- All Reviews Grid -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-bold text-white">Dish Ledger</h2>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 rounded-lg bg-primary text-background-dark text-sm font-bold">Top Rated</button>
+<button class="px-3 py-1.5 rounded-lg bg-glass-bg border border-glass-border text-slate-300 hover:text-white text-sm font-medium">Recent</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+<!-- Review Item 1 -->
+<div class="bg-glass-bg/50 border border-glass-border rounded-lg p-4 flex gap-4 hover:bg-glass-bg transition-colors cursor-pointer">
+<div class="h-24 w-24 rounded-lg bg-cover bg-center shrink-0" data-alt="Close up of cheese pizza" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAOHsHwUiV-_oYxfZDaEqztjvV5i9q9axMdCKPLk-jaIrASI03ePbS2eZfD1kJ11hD-dwlI10Tjwgilu3F3kq6EsdQYj40SjcFbgp7pzFfBiWMVi2bXphKB9bWvmi__mIW874xmpG9K-7ZuzkbH45WH2hxbh5lt1ue-kMXHmBlb4-5P4p5hzGKbVC3kg_cFnGM4yds0bruP9gwm1-8ZuyhWJ11A-z3p2Anuk81JZL0pqxrfH9zeKokdip17eFzmt95wR6oC6YIYyhQU');"></div>
+<div class="flex flex-col justify-between flex-grow">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-bold text-white text-lg">Plain Pie</h3>
+<span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded font-bold">96%</span>
+</div>
+<p class="text-slate-400 text-sm mt-1 line-clamp-2">The basil on top really makes it fresh. Sauce is sweet but tangy.</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-xs text-slate-500">Last reviewed by</span>
+<img alt="User" class="h-5 w-5 rounded-full" data-alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFE5Vk7r_09UuOX8xKJKWYKFtLFuiN7AqjsgKjBzVuBu2PcPedB-N_XPCr_MpfhntZefd80oa-JqizBgbEhq5-XoRpgcjTaCG6uW1kl7NHDxulhsHdGcxGiXVvjxFbrKVd299-INhTzW7Jna0UeEsua69s7NMrBSbSQeUmD8wmfSkvgaCqCUnBY2uNUk2oLQ70_DBU99n8LOBvnpOJpJFGQXBZq7nCGq0bx6O7OiE2UmbN-6X4jgoYzwlkkLFXjzJur9yqEapLLUpW"/>
+<span class="text-xs text-slate-300 font-medium">Alex M.</span>
+</div>
+</div>
+</div>
+<!-- Review Item 2 -->
+<div class="bg-glass-bg/50 border border-glass-border rounded-lg p-4 flex gap-4 hover:bg-glass-bg transition-colors cursor-pointer">
+<div class="h-24 w-24 rounded-lg bg-cover bg-center shrink-0" data-alt="Fried artichokes appetizer" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCEXWEFigYXne3K6wvsy-o8NihrBraqI33974jcDn2X7oJnv8jVS9o_j7vGSzr_jjKKdbvpbHeLaIbwMSb2SgnSdi8fzllldWxzv5vK7mK2nv8JixgRBROx5t8a4SiX0UyxriYFbAJl1LPkxA4nIdDm0kb_fRZWnM2mIzFlmqi5JGv1foyfSIYoBaz16dV0xC9iyU-HzyDilgKTK37eAqAaDNzZHJwm-rQ7Q8XoIpB6DYtHHObS0YhuGw3EVTdqW7-IJujEeOswj3RN');"></div>
+<div class="flex flex-col justify-between flex-grow">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-bold text-white text-lg">Artichokes</h3>
+<span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded font-bold">88%</span>
+</div>
+<p class="text-slate-400 text-sm mt-1 line-clamp-2">Crispy and light, not too oily. Good shareable.</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-xs text-slate-500">Last reviewed by</span>
+<img alt="User" class="h-5 w-5 rounded-full" data-alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyMQxtbuRXkDjxieGq27cnT2NYlOIyw243N7WpaOHKztSZQiqSKVUjRSLPUstiVxYsLPI5Klg-2bixtRR-D33jGijNWDLzIAIov3AOsP_O-wyjDojZoZBm3sapvKezOkcZ8wp91cmT9s_AWUPkVZON9XUTqo__yrmNT_A0Eel7gSo2lN-NhvfQLw2O_XHxFv9sol01ialPyh69FI4_gnWRlXMbdw_Z25eyP015GcLizHh2UwLABbkwsagkpI3EC78Win7ecvny2VWg"/>
+<span class="text-xs text-slate-300 font-medium">Tom H.</span>
+</div>
+</div>
+</div>
+<!-- Review Item 3 -->
+<div class="bg-glass-bg/50 border border-glass-border rounded-lg p-4 flex gap-4 hover:bg-glass-bg transition-colors cursor-pointer">
+<div class="h-24 w-24 rounded-lg bg-cover bg-center shrink-0" data-alt="Bowl of pasta with red sauce" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBkoTMje0NWRAlhzvU1ze6Wz4RtkDm5GrezXqpjNJ5iprvnON5u62ljQydkN92-B65l3YlGVYHRzEB6K0OY_O-mf9_W5_QxJZpgRqkB2Lgkt6dArQDNIRoCEuwzP8zWFgtailFTlHEKJZk-7X6wL2Z7X9O336VEhgv0eI_4lFyAc_CwF1xGUSCEq-FtqruItJXqspgYBSH_MJyLH-Qic9t-kV-s3f7sWB6t0ANrsZxZhUslXC9Fb6JK4aH9quvLLo6bPCV89M8qW1aB');"></div>
+<div class="flex flex-col justify-between flex-grow">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-bold text-white text-lg">Rigatoni</h3>
+<span class="bg-primary/20 text-primary text-xs px-2 py-1 rounded font-bold">82%</span>
+</div>
+<p class="text-slate-400 text-sm mt-1 line-clamp-2">Solid pasta dish if you aren't feeling pizza.</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-xs text-slate-500">Last reviewed by</span>
+<img alt="User" class="h-5 w-5 rounded-full" data-alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCLWk4Yg5y2BoXBFFNclooT8Z29wmdcrXRLm9s21GUV0t7RMnaToZDv1XGWjrs0RJJBAvQVo-tOpLxaeL4VyXvBpTc_S9iEBTfwdSFQpCIy0-Ok0V_J2B63RhPD-8OOZ2qQpnttnpJeNvNEe4Fd2t0dtNFxVJYFSeaykeu1ZzyCcWEbLxQ1ihzDamo-dZc4qiiIC78M2FKYCM-mjrQk2HWF73txU6HQwnBH7ir2D0Rhtoi_WASwu6RpO1lwnGwENvs7ZCAuoGNXFL4"/>
+<span class="text-xs text-slate-300 font-medium">Jess K.</span>
+</div>
+</div>
+</div>
+<!-- Review Item 4 -->
+<div class="bg-glass-bg/50 border border-glass-border rounded-lg p-4 flex gap-4 hover:bg-glass-bg transition-colors cursor-pointer">
+<div class="h-24 w-24 rounded-lg bg-cover bg-center shrink-0" data-alt="Simple cheese pizza" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDX5ni9l57wwVo52xMIgH9lIUs21Z238UxmObJJx-DVBZ7kszjim6VYVknZ1yMh9y5g5OCQO5XAjvb08JfWZCOC5cgl5xH1nVA1x9y-ZLLUx-CO7Z-NJhtYNnjGNOflHeUqIGv8lhi4xGKuoeKNG_wdz0D8IIQC84fyvULasiW_F-ZqVsrHUOnp_quusLLTKC26oG8DsWS5wSLYCN9-l75OlHacr9Nx_E8CZT3wuJJL9lM-dnOphrhpXS6PgbCfo55AEEeSAlfpegR');"></div>
+<div class="flex flex-col justify-between flex-grow">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-bold text-white text-lg">Cheese Slice</h3>
+<span class="bg-primary/20 text-primary text-xs px-2 py-1 rounded font-bold">90%</span>
+</div>
+<p class="text-slate-400 text-sm mt-1 line-clamp-2">Classic NY slice. Fold it and eat it.</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-xs text-slate-500">Last reviewed by</span>
+<img alt="User" class="h-5 w-5 rounded-full" data-alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZzENKzZjHHXjoPDF_VEzmh_is8BuyMwAfW2Wrq8sJPbqokE3qp27mkwhRy33MOvjy66FMkhHz6rm0aVZC_HU-Vy43k67wy6SpETTnaf0mA_yzkaD_le4PKDlCPwrp7PN4h-OYu6kVFHsvrBQkEgPfXDLnDTCQKkAbHxJ9q-OwIKhK7dMUenyZPrzcbjY5l6QhFnTKQx9W6vTjzDJOBL_J3xU0_XNPHGsBFLCZqL0GYGD5vXBKhQhk7o13xTYe1VGISqHoCxu_6x3S"/>
+<span class="text-xs text-slate-300 font-medium">Dave P.</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Sidebar -->
+<aside class="lg:col-span-4 space-y-8">
+<!-- The Avoid List -->
+<div class="bg-red-500/5 border border-red-500/20 rounded-xl p-6 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 text-red-500/10">
+<span class="material-symbols-outlined" style="font-size: 120px;">block</span>
+</div>
+<h3 class="text-xl font-bold text-red-400 flex items-center gap-2 mb-4 relative z-10">
+<span class="material-symbols-outlined">warning</span>
+                        The Avoid List
+                    </h3>
+<div class="space-y-4 relative z-10">
+<div class="flex gap-3 items-start border-b border-red-500/10 pb-3 last:border-0 last:pb-0">
+<div class="h-12 w-12 rounded bg-glass-bg flex items-center justify-center text-red-400 shrink-0">
+<span class="material-symbols-outlined">wine_bar</span>
+</div>
+<div>
+<h4 class="text-white font-medium">House Red Wine</h4>
+<p class="text-xs text-slate-400 mt-1">3 friends disliked this. "Too acidic" - Mark</p>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<div class="h-12 w-12 rounded bg-glass-bg flex items-center justify-center text-red-400 shrink-0">
+<span class="material-symbols-outlined">bakery_dining</span>
+</div>
+<div>
+<h4 class="text-white font-medium">Garlic Knots</h4>
+<p class="text-xs text-slate-400 mt-1">Dry and burnt last time.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Location Map Widget -->
+<div class="bg-glass-bg border border-glass-border rounded-xl overflow-hidden">
+<div class="h-48 w-full bg-cover bg-center" data-alt="Map view of Brooklyn showing restaurant location" data-location="Brooklyn, New York Map" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuClG9du6nksKHtYZQzhMbrnGiGJC1-49L1N-F8trYJH8t7AVbrBWatJT-2DE8rkXs8u3y15s4-VK6Ooc9bxxqCWBmnLnYJuc6GUT4-xEEhkBdCMIxmAxzVQGyNz3XNf5cFLbk6h3wRydFjyzyIAZJSclntkLUtR9v1Djr-Wgz3dpWZGBqEYcxJDGRagGPxRfQly-k0lCiAxpIUw9zttC6vMdbE7k1WTA-DhaMtbIwYqRyH5VYZOCSTF9bypTka_0MrTernZgZ8lPF7A');">
+<div class="w-full h-full bg-black/20 flex items-center justify-center">
+<div class="bg-primary text-background-dark p-2 rounded-full shadow-lg transform -translate-y-4">
+<span class="material-symbols-outlined block">restaurant</span>
+</div>
+</div>
+</div>
+<div class="p-4">
+<h4 class="text-white font-bold mb-1">Get Directions</h4>
+<p class="text-slate-400 text-sm mb-4">575 Henry St, Brooklyn, NY 11231</p>
+<button class="w-full py-2 rounded-lg bg-glass-bg border border-glass-border text-slate-300 hover:text-white hover:border-slate-500 transition-all text-sm font-medium">Open in Maps</button>
+</div>
+</div>
+<!-- Quick Stats -->
+<div class="bg-glass-bg border border-glass-border rounded-xl p-6">
+<h3 class="text-white font-bold mb-4">Your Circle Stats</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-slate-400 text-sm">Visits this month</span>
+<span class="text-white font-bold">12</span>
+</div>
+<div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[45%]"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-400 text-sm">Top Dish</span>
+<span class="text-primary font-bold text-sm">Pepperoni Pie</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<footer class="mt-auto border-t border-glass-border bg-background-dark/50 py-12">
+<div class="max-w-7xl mx-auto px-6 text-center text-slate-500 text-sm">
+<p>© 2023 PlateMate Inc. All rights reserved.</p>
+</div>
+</footer>
+</body></html>

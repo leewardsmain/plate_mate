@@ -1,0 +1,59 @@
+name: PlateMate AWS Deployment
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy Backend (AWS SAM)
+        id: sam_deploy
+        run: |
+          sam build
+          sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
+            --stack-name platemate-pro-stack \
+            --capabilities CAPABILITY_IAM \
+            --resolve-s3 \
+            --parameter-overrides GoogleApiKey=${{ secrets.GOOGLE_API_KEY }}
+          
+          # Extract outputs
+          API_URL=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)
+          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" --output text)
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
+          
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+
+      - name: Build Frontend
+        env:
+          VITE_API_URL: ${{ steps.sam_deploy.outputs.api_url }}
+        run: npm run build
+
+      - name: Deploy Frontend to S3
+        run: aws s3 sync dist/ s3://${{ steps.sam_deploy.outputs.bucket_name }} --delete
+
+      - name: Invalidate CloudFront Cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ steps.sam_deploy.outputs.distribution_id }} --paths "/*"
