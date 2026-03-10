@@ -14,9 +14,10 @@ const ddbClient = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 const s3Client = new S3Client({});
 
-const REVIEWS_TABLE = "platemate-reviews";
-const USERS_TABLE = "platemate-users";
-const AVATAR_BUCKET = "platemate-frontend-app";
+const REVIEWS_TABLE = process.env.REVIEWS_TABLE || "platemate-reviews";
+const USERS_TABLE = process.env.USERS_TABLE || "platemate-users";
+const AVATAR_BUCKET = process.env.AVATAR_BUCKET || "platemate-frontend-app";
+const RESTAURANTS_TABLE = process.env.RESTAURANTS_TABLE || "platemate-restaurants";
 
 exports.handler = async (event) => {
     console.log("Event:", JSON.stringify(event));
@@ -30,11 +31,11 @@ exports.handler = async (event) => {
         path = '/' + pathParameters.proxy;
     } else {
         // 2. Fallback: Strip common prefixes like stage name or /_user_request_
-        // This handles cases like /dev/reviews or /_user_request_/reviews
-        path = path.replace(/^\/(?:dev|prod|stage)\//, '/');
-        path = path.replace(/^\/_user_request_\//, '/');
+        // This handles cases like /dev/reviews or /_user_request_/reviews (case-insensitive)
+        path = path.replace(/^\/(?:dev|prod|stage)\//i, '/');
+        path = path.replace(/^\/_user_request_\//i, '/');
         // Handle cases where it might be /dev/_user_request_/reviews
-        path = path.replace(/^\/(?:dev|prod|stage)\/_user_request_\//, '/');
+        path = path.replace(/^\/(?:dev|prod|stage)\/_user_request_\//i, '/');
     }
 
     // 3. Remove trailing slashes and normalize
