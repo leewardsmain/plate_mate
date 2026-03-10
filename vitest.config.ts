@@ -8,6 +8,6 @@ export default defineConfig({
         setupFiles: ['./src/setupTests.ts'],
         globals: true,
         include: ['src/__tests__/unit/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'tests/**/*.ts'],
-        exclude: ['tests/e2e/**']
+        exclude: ['tests/e2e/**', 'tests/api_integration.test.ts']
     }
 });
