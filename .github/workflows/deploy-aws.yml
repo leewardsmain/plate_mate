@@ -42,14 +42,20 @@ jobs:
           API_URL=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)
           BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" --output text)
           DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
+          USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
+          USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)
           
           echo "api_url=$API_URL" >> $GITHUB_OUTPUT
           echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
           echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+          echo "user_pool_id=$USER_POOL_ID" >> $GITHUB_OUTPUT
+          echo "user_pool_client_id=$USER_POOL_CLIENT_ID" >> $GITHUB_OUTPUT
 
       - name: Build Frontend
         env:
           VITE_API_URL: ${{ steps.sam_deploy.outputs.api_url }}
+          VITE_USER_POOL_ID: ${{ steps.sam_deploy.outputs.user_pool_id }}
+          VITE_USER_POOL_CLIENT_ID: ${{ steps.sam_deploy.outputs.user_pool_client_id }}
         run: npm run build
 
       - name: Deploy Frontend to S3

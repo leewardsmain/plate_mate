@@ -1,13 +1,11 @@
 import type { ResourcesConfig } from 'aws-amplify';
 
-// Placeholder configuration for AWS Cognito Auth.
-// The user will need to supply these values to connect to their User Pool.
+// Configuration for AWS Cognito Auth.
 export const authConfig: ResourcesConfig = {
     Auth: {
         Cognito: {
-            userPoolId: '',
-            userPoolClientId: '',
-            identityPoolId: '', // Optional
+            userPoolId: import.meta.env.VITE_USER_POOL_ID || '',
+            userPoolClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID || '',
         }
     }
 };
