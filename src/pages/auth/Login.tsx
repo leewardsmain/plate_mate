@@ -7,7 +7,7 @@ import styles from './Auth.module.css';
 export default function Login() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { setAuthStatus, addToast } = useAppStore();
+    const { setAuthStatus, addToast, initApp } = useAppStore();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -28,6 +28,7 @@ export default function Login() {
                 addToast('Please verify your email address.', 'info');
                 navigate('/verify-email', { state: { email } });
             } else if (result.isSignedIn) {
+                await initApp();
                 setAuthStatus(true);
                 addToast('Welcome back!', 'success');
                 navigate(from, { replace: true });
