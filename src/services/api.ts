@@ -84,6 +84,9 @@ export const api = {
             body: JSON.stringify(updates)
         }),
 
+    deleteUser: (userId: string): Promise<{ message: string }> =>
+        apiRequest(`/users/${userId}`, { method: 'DELETE' }),
+
     // Media
     getAvatarUploadUrl: (userId: string, fileName: string, contentType: string): Promise<{ uploadUrl: string, publicUrl: string, key: string }> =>
         apiRequest(`/users/${userId}/avatar`, {

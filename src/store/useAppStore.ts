@@ -95,6 +95,7 @@ interface AppState {
     signOut: () => Promise<void>;
     updateCurrentUser: (updates: Partial<UserProfile>) => Promise<void>;
     updateUserAvatar: (fileOrUrl: File | string | null) => Promise<void>;
+    deleteAccount: () => Promise<void>;
 
     // Restaurant Search & Details
     searchResults: any[];
@@ -441,6 +442,32 @@ export const useAppStore = create<AppState>((set, get) => ({
             }));
         } catch (error) {
             console.error("Avatar status change failed:", error);
+        }
+    },
+
+    deleteAccount: async () => {
+        try {
+            const currentId = get().currentUser.id;
+
+            // 1. Delete user from custom DynamoDB backend
+            if (currentId !== 'user_1') { // Prevent deleting mock seed if theoretically possible
+                await api.deleteUser(currentId);
+            }
+
+            // 2. Delete user from Cognito via Amplify
+            const { deleteUser: amplifyDeleteUser } = await import('../services/authAdapter');
+            await amplifyDeleteUser();
+
+            // 3. Reset internal global state completely
+            set({
+                currentUser: INITIAL_STATE.currentUser,
+                isAuthenticated: false,
+                feedReviews: get().feedReviews.filter(r => r.author !== currentId)
+            });
+
+        } catch (error) {
+            console.error("Delete account failed:", error);
+            throw error;
         }
     },
 

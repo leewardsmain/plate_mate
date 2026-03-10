@@ -197,6 +197,16 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Profile updated" }) };
         }
 
+        // DELETE /users/{id}
+        else if (httpMethod === 'DELETE' && path.startsWith('/users/')) {
+            const userId = path.split('/').pop();
+            await ddbDocClient.send(new DeleteCommand({
+                TableName: USERS_TABLE,
+                Key: { userId }
+            }));
+            return { statusCode: 200, headers, body: JSON.stringify({ message: "Account deleted" }) };
+        }
+
         // POST /users/{id}/avatar (Presigned URL)
         else if (httpMethod === 'POST' && path.includes('/avatar')) {
             const userId = path.split('/')[2];

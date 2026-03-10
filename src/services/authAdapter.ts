@@ -129,3 +129,15 @@ export const signOut = async () => {
     currentMockSession = false;
     currentMockUserEmail = null;
 };
+
+export const deleteUser = async () => {
+    if (isConfigured) return amplifyAuth.deleteUser();
+    await delay(800);
+
+    // In mock mode, remove the user from our fake user database
+    if (currentMockUserEmail) {
+        mockUsers.delete(currentMockUserEmail);
+    }
+    currentMockSession = false;
+    currentMockUserEmail = null;
+};

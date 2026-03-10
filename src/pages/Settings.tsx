@@ -17,7 +17,7 @@ const ACCENT_COLORS = [
 ];
 
 export default function Settings() {
-    const { currentUser, updateCurrentUser, updateUserAvatar, accentColor, setAccentColor, addToast, signOut } = useAppStore();
+    const { currentUser, updateCurrentUser, updateUserAvatar, accentColor, setAccentColor, addToast, deleteAccount } = useAppStore();
 
     // Local form state
     const [formData, setFormData] = useState({
@@ -40,6 +40,7 @@ export default function Settings() {
     // Modals
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
 
@@ -129,10 +130,17 @@ export default function Settings() {
         setShowDeleteModal(true);
     };
 
-    const confirmDeleteAccount = () => {
-        setShowDeleteModal(false);
-        signOut();
-        addToast('Account deleted. We will miss you!', 'success');
+    const confirmDeleteAccount = async () => {
+        setIsDeleting(true);
+        try {
+            await deleteAccount();
+            setShowDeleteModal(false);
+            addToast('Account deleted. We will miss you!', 'success');
+        } catch (error) {
+            addToast('Failed to delete account. Please try again.', 'error');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const handleSave = useCallback((e: React.FormEvent) => {
@@ -210,8 +218,10 @@ export default function Settings() {
                     Are you sure you want to delete your account? This action is permanent and cannot be undone. All your reviews, saved restaurants, and profile data will be lost.
                 </p>
                 <div className={styles.modalActions}>
-                    <button className={styles.btnSecondary} onClick={() => setShowDeleteModal(false)}>Cancel</button>
-                    <button className={styles.btnDestructive} onClick={confirmDeleteAccount}>Yes, delete my account</button>
+                    <button className={styles.btnSecondary} onClick={() => setShowDeleteModal(false)} disabled={isDeleting}>Cancel</button>
+                    <button className={styles.btnDestructive} onClick={confirmDeleteAccount} disabled={isDeleting}>
+                        {isDeleting ? 'Deleting...' : 'Yes, delete my account'}
+                    </button>
                 </div>
             </Modal>
 
