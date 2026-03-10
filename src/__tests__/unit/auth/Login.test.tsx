@@ -22,6 +22,7 @@ describe('Login Component', () => {
         (useAppStore as unknown as any).mockReturnValue({
             isAuthenticated: false,
             addToast: vi.fn(),
+            initApp: vi.fn(),
         });
 
         render(
@@ -44,6 +45,7 @@ describe('Login Component', () => {
             isAuthenticated: false,
             addToast: mockAddToast,
             setAuthStatus: vi.fn(),
+            initApp: vi.fn(),
         });
 
         render(
