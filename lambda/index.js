@@ -10,9 +10,15 @@ const {
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
-const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-east-1' });
+const ddbClient = new DynamoDBClient({
+    region: process.env.AWS_REGION || 'us-east-1',
+    credentials: { accessKeyId: 'MOCK_ACCESS_KEY', secretAccessKey: 'MOCK_SECRET_KEY' }
+});
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
-const s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION || 'us-east-1',
+    credentials: { accessKeyId: 'MOCK_ACCESS_KEY', secretAccessKey: 'MOCK_SECRET_KEY' }
+});
 
 const REVIEWS_TABLE = process.env.REVIEWS_TABLE || "platemate-reviews";
 const USERS_TABLE = process.env.USERS_TABLE || "platemate-users";
