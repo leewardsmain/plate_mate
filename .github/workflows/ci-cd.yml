@@ -83,11 +83,17 @@ jobs:
       - name: E2E Tests
         run: npm run test:e2e
 
+      - name: Debug Info
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Ref Name: ${{ github.ref_name }}"
+
   deploy:
     name: Deploy to Production
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref_name == 'main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
