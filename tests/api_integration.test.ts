@@ -1,13 +1,26 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import fetch from 'node-fetch';
 
-const API_URL = process.env.VITE_API_URL || 'http://localhost:4566/restapis/vgnhvc9bqs/dev/_user_request_';
+const API_URL = process.env.VITE_API_URL;
 
 // Helpers to extract ID from URL since LocalStack Gateway mock may have different ID
 const getRestApiId = async () => {
-    // Attempting to dynamically get the Rest API ID if VITE_API_URL didn't work directly
-    // For local tests, we'll try the provided env var API_URL
-    return API_URL;
+    if (API_URL) return API_URL;
+    
+    // For local tests without env var, try to discover via LocalStack
+    try {
+        const res = await fetch('http://localhost:4566/restapis');
+        const data: any = await res.json();
+        if (data.items && data.items.length > 0) {
+            const apiId = data.items[0].id; // Pick first one
+            return `http://localhost:4566/restapis/${apiId}/dev/_user_request_`;
+        }
+    } catch (e) {
+        console.warn("Could not auto-discover API ID from LocalStack:", e);
+    }
+    
+    // Fallback to a common localstack default if discovery fails
+    return 'http://localhost:4566/restapis/local/dev/_user_request_';
 };
 
 describe('Backend API Integration Tests (LocalStack)', () => {
@@ -35,14 +48,14 @@ describe('Backend API Integration Tests (LocalStack)', () => {
                 })
             });
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(data.message).toBe("Profile updated");
         });
 
         it('should fetch a user profile (GET /users/{id})', async () => {
             const res = await fetch(`${baseUrl}/users/${testUserId}`);
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(data.name).toBe("Test User");
             expect(data.bio).toBe("I love testing.");
         });
@@ -54,7 +67,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
                 body: JSON.stringify({ fileName: "my-avatar.jpg", contentType: "image/jpeg" })
             });
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(data.uploadUrl).toBeDefined();
             expect(data.publicUrl).toBeDefined();
             expect(data.key).toContain("avatars/test_user_123/");
@@ -67,7 +80,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
                 body: JSON.stringify({ fileName: "my-meal.jpg", contentType: "image/jpeg" })
             });
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(data.uploadUrl).toBeDefined();
             expect(data.publicUrl).toBeDefined();
             expect(data.key).toContain("meals/test_user_123/");
@@ -78,7 +91,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
         it('should search for a restaurant (GET /restaurants/search?q=...)', async () => {
             const res = await fetch(`${baseUrl}/restaurants/search?q=pizza&location=Boston`);
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(Array.isArray(data)).toBe(true);
             // It might return empty from Google if API key is invalid/missing
             // Our backend has a mock fallback
@@ -89,7 +102,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
             expect([200, 404]).toContain(res.status);
             // Valid fetch or Mock fallback fetch should be 200
             if (res.status === 200) {
-                const data = await res.json();
+                const data = await res.json() as any;
                 expect(data).toBeDefined();
             }
         });
@@ -124,7 +137,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
                 body: JSON.stringify({ fileName: "custom-header.jpg" })
             });
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(data.uploadUrl).toBeDefined();
             expect(data.publicUrl).toBeDefined();
         });
@@ -154,7 +167,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
         it('should fetch all reviews (GET /reviews)', async () => {
             const res = await fetch(`${baseUrl}/reviews`);
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(Array.isArray(data)).toBe(true);
             const found = data.find((r: any) => r.reviewId === createdReviewId);
             expect(found).toBeDefined();
@@ -176,7 +189,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
         it('should fetch all reviews and see the updated text', async () => {
             const res = await fetch(`${baseUrl}/reviews`);
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             const found = data.find((r: any) => r.reviewId === createdReviewId);
             expect(found.text).toBe("Updated text: it was okay actually.");
             expect(found.dishes.length).toBe(1);
@@ -189,7 +202,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
                 body: JSON.stringify({ userId: "user_liker_99" })
             });
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(data.likes).toBe(1);
             expect(data.likedBy).toContain("user_liker_99");
         });
@@ -201,7 +214,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
                 body: JSON.stringify({ userId: "user_liker_99" })
             });
             expect(res.status).toBe(200);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(data.likes).toBe(0);
             expect(data.likedBy).not.toContain("user_liker_99");
         });
@@ -213,7 +226,7 @@ describe('Backend API Integration Tests (LocalStack)', () => {
                 body: JSON.stringify({ author: "Commenter Bob", text: "Nice soup!" })
             });
             expect(res.status).toBe(201);
-            const data = await res.json();
+            const data = await res.json() as any;
             expect(data.text).toBe("Nice soup!");
             expect(data.author).toBe("Commenter Bob");
         });
