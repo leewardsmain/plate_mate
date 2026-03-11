@@ -24,8 +24,8 @@ test.describe('PlateMate E2E Flows', () => {
     });
 
     test('should create a new review via the floating action button', async ({ page }) => {
-        // Find the FAB (check for the icon or aria-label)
-        await page.click('button:has-text("add")'); // Common for Material Icons
+        // Find the FAB by aria-label or text
+        await page.getByRole('button', { name: /Log Meal|Add Review/i }).first().click();
 
         await expect(page.getByText('Log a Meal')).toBeVisible();
 

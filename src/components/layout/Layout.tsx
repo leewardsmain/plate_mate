@@ -63,7 +63,7 @@ export default function Layout() {
                     <button className={`${styles.iconButton} ${styles.hideMobile}`}>
                         <span className="material-symbols-outlined">chat_bubble</span>
                     </button>
-                    <button className={styles.primaryButton} onClick={() => openCreateReviewModal()}>
+                    <button className={styles.primaryButton} onClick={() => openCreateReviewModal()} aria-label="Log Meal">
                         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
                         <span className={styles.hideMobileText}>Log Meal</span>
                     </button>
@@ -157,7 +157,7 @@ export default function Layout() {
                 </Link>
 
                 <div className={styles.fabContainer}>
-                    <button className={styles.fab} onClick={() => openCreateReviewModal()}>
+                    <button className={styles.fab} onClick={() => openCreateReviewModal()} aria-label="Add Review">
                         <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>add</span>
                     </button>
                 </div>
