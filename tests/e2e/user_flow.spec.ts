@@ -68,6 +68,11 @@ test.describe('PlateMate E2E Flows', () => {
         // Ensure the selection is processed
         await page.waitForTimeout(500);
 
+        // Advance to Step 2
+        const nextBtn = page.locator('button:has-text("Next")');
+        await expect(nextBtn).toBeVisible();
+        await nextBtn.click();
+
         await page.locator('textarea').fill('Best pizza ever!');
         
         // Click the post button in the modal
