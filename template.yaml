@@ -47,11 +47,6 @@ Resources:
           RequireNumbers: true
           RequireSymbols: true
           RequireUppercase: true
-      Schema:
-        - Name: email
-          AttributeDataType: String
-          Required: true
-          Mutable: true
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
@@ -91,13 +86,14 @@ Resources:
         Origins:
           - DomainName: !GetAtt FrontendBucket.RegionalDomainName
             Id: S3Origin
-            S3OriginConfig: {}
             OriginAccessControlId: !Ref CloudFrontOriginAccessControl
         DefaultCacheBehavior:
           TargetOriginId: S3Origin
           ViewerProtocolPolicy: redirect-to-https
           ForwardedValues:
             QueryString: false
+            Cookies:
+              Forward: none
           Compress: true
 
   FrontendBucketPolicy:
