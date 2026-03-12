@@ -56,10 +56,7 @@ describe('CreateReviewModal text review field', () => {
         // Click on the venue to select it
         fireEvent.click(screen.getByText('Test Restaurant'));
 
-        // Click 'Next: Add Dishes'
-        fireEvent.click(screen.getByText('Next: Add Dishes'));
-
-        // Step 2: Text Review Input
+        // Step 2: Text Review Input (Auto-advances)
         await waitFor(() => {
             expect(screen.getByText('What did you have?')).toBeInTheDocument();
         });
