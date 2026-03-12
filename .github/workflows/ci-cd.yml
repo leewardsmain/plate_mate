@@ -52,6 +52,7 @@ jobs:
           
           # Create Lambda Execution Role (Mock)
           awslocal iam create-role --role-name lambda-role --assume-role-policy-document '{"Version": "2012-10-17","Statement": [{ "Effect": "Allow", "Principal": {"Service": "lambda.amazonaws.com"}, "Action": "sts:AssumeRole"}]}'
+          awslocal iam put-role-policy --role-name lambda-role --policy-name lambda-policy --policy-document '{"Version": "2012-10-17","Statement": [{"Effect": "Allow","Action": ["dynamodb:*","s3:*"],"Resource": "*"}]}'
           
           # Create Lambda Function
           cd lambda && npm install && zip -r ../lambda.zip . && cd ..
