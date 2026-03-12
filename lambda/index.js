@@ -401,10 +401,15 @@ exports.handler = async (event) => {
 
     } catch (error) {
         console.error("Handler Error:", error);
+        console.error("Stack Trace:", error.stack);
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: error.message })
+            body: JSON.stringify({ 
+                error: error.message,
+                stack: error.stack,
+                details: "Check CloudWatch logs for more info"
+            })
         };
     }
 };
