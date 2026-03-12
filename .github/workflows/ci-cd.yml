@@ -27,6 +27,8 @@ jobs:
         run: npm run lint
 
       - name: Unit Tests
+        env:
+          NODE_ENV: test
         run: npm run test
 
       - name: Setup LocalStack

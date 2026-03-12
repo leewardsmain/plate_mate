@@ -14,13 +14,28 @@ vi.mock('@aws-sdk/s3-request-presigner', () => ({
 }));
 
 // Require the handler AFTER mocks
-const { handler } = require('../../lambda/index');
+const lambda = require('../../lambda/index');
+const { handler, _test_setClients } = lambda;
 
 describe('Lambda Backend Unit Tests', () => {
     beforeEach(() => {
         ddbMock.reset();
         s3Mock.reset();
         vi.clearAllMocks();
+
+        // Inject mocks with dummy credentials to satisfy getSignedUrl requirements
+        if (_test_setClients) {
+            const s3WithCreds = new S3Client({
+                region: 'us-east-1',
+                credentials: { accessKeyId: 'test', secretAccessKey: 'test' }
+            });
+            // We still want to use the mock client for assertions, but need the creds
+            // Actually, s3Mock IS an S3Client instance from aws-sdk-client-mock
+            // but let's see if we can just inject a real one with creds that we then mock
+            _test_setClients(ddbMock, s3WithCreds);
+            // Re-bind s3Mock to the one we just injected if needed, 
+            // but actually mock-aws-sdk usually works by constructor interception
+        }
     });
 
     it('GET /reviews should return all reviews', async () => {

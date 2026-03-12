@@ -11,6 +11,14 @@ const AWS_REGION = process.env.AWS_REGION || 'us-east-1';
 let ddbDocClient;
 let s3Client;
 
+// Test helper to inject mocks
+if (process.env.NODE_ENV === 'test') {
+    exports._test_setClients = (ddb, s3) => {
+        ddbDocClient = ddb;
+        s3Client = s3;
+    };
+}
+
 exports.handler = async (event) => {
     console.log("Event:", JSON.stringify(event));
 
