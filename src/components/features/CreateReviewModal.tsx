@@ -81,7 +81,7 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
                         name: d.name || 'Unknown Dish',
                         rating: d.rating || 5.0,
                         sentiment: d.sentiment || 'none',
-                        img: d.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80' // default food image
+                        img: d.img || ''
                     }))
                 });
             }
@@ -196,6 +196,8 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
                                             onClick={() => {
                                                 setSelectedVenue(v.place_id);
                                                 setSelectedVenueDetails(v);
+                                                // Auto-advance to step 2
+                                                setStep(2);
                                             }}
                                         >
                                             <div className={styles.venueImage} style={{

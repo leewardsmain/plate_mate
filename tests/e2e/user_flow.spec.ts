@@ -64,13 +64,10 @@ test.describe('PlateMate E2E Flows', () => {
         // Use dispatchEvent to ensure click event is fired even if intercepted
         await suggestion.dispatchEvent('click');
 
-        // Advance to Step 2
-        const nextBtn = page.locator('button:has-text("Next")');
-        // The button might take a moment to enable after state update
-        await expect(nextBtn).toBeEnabled({ timeout: 10000 });
-        await nextBtn.click();
-
-        await page.locator('textarea').fill('Best pizza ever!');
+        // Modal should auto-advance to step 2 (showing textarea)
+        const textarea = page.locator('textarea');
+        await expect(textarea).toBeVisible({ timeout: 10000 });
+        await textarea.fill('Best pizza ever!');
         
         // Click the post button in the modal
         await page.locator('button:has-text("Post"), button:has-text("Create")').click();
