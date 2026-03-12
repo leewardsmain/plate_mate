@@ -7,6 +7,10 @@ export default defineConfig({
     retries: process.env.CI ? 2 : 0,
     workers: process.env.CI ? 1 : undefined,
     reporter: 'html',
+    timeout: 60000,
+    expect: {
+        timeout: 10000,
+    },
     use: {
         baseURL: 'http://localhost:5173',
         trace: 'on-first-retry',
@@ -18,8 +22,9 @@ export default defineConfig({
         },
     ],
     webServer: {
-        command: 'npm run dev',
+        command: process.env.CI ? 'npm run build && npx vite preview --port 5173' : 'npm run dev',
         url: 'http://localhost:5173',
         reuseExistingServer: !process.env.CI,
+        timeout: 120000,
     },
 });
