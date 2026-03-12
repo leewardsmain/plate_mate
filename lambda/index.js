@@ -1,13 +1,3 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const {
-    DynamoDBDocumentClient,
-    ScanCommand,
-    PutCommand,
-    UpdateCommand,
-    DeleteCommand,
-    GetCommand
-} = require("@aws-sdk/lib-dynamodb");
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 // Environment variables
@@ -18,27 +8,50 @@ const RESTAURANTS_TABLE = process.env.RESTAURANTS_TABLE || "platemate-restaurant
 const IS_LOCALSTACK = process.env.IS_LOCALSTACK === "true";
 const AWS_REGION = process.env.AWS_REGION || 'us-east-1';
 
-// Client configuration
-const clientConfig = {
-    region: AWS_REGION,
-};
-
-// Use LocalStack endpoint if running in LocalStack
-if (IS_LOCALSTACK) {
-    clientConfig.endpoint = "http://localhost:4566";
-    clientConfig.forcePathStyle = true; // Required for LocalStack S3
-    clientConfig.credentials = {
-        accessKeyId: "test",
-        secretAccessKey: "test"
-    };
-}
-
-const ddbClient = new DynamoDBClient(clientConfig);
-const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
-const s3Client = new S3Client(clientConfig);
+let ddbDocClient;
+let s3Client;
 
 exports.handler = async (event) => {
     console.log("Event:", JSON.stringify(event));
+
+    // Initialize clients inside handler for better test isolation and lazy loading
+    if (!ddbDocClient) {
+        const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+        const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+        
+        const clientConfig = { region: AWS_REGION };
+        if (IS_LOCALSTACK) {
+            clientConfig.endpoint = "http://localhost:4566";
+            clientConfig.forcePathStyle = true;
+            clientConfig.credentials = { accessKeyId: "test", secretAccessKey: "test" };
+        }
+        
+        const ddbClient = new DynamoDBClient(clientConfig);
+        ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
+    }
+
+    if (!s3Client) {
+        const { S3Client } = require("@aws-sdk/client-s3");
+        
+        const clientConfig = { region: AWS_REGION };
+        if (IS_LOCALSTACK) {
+            clientConfig.endpoint = "http://localhost:4566";
+            clientConfig.forcePathStyle = true;
+            clientConfig.credentials = { accessKeyId: "test", secretAccessKey: "test" };
+        }
+        
+        s3Client = new S3Client(clientConfig);
+    }
+
+    // Explicitly import required commands for DynamoDB
+    const { 
+        ScanCommand, 
+        PutCommand, 
+        UpdateCommand, 
+        DeleteCommand, 
+        GetCommand 
+    } = require("@aws-sdk/lib-dynamodb");
+    const { PutObjectCommand } = require("@aws-sdk/client-s3");
 
     let { httpMethod, path, pathParameters, body: bodyStr } = event;
     const body = bodyStr ? JSON.parse(bodyStr) : {};
