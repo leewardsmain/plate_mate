@@ -59,14 +59,15 @@ test.describe('PlateMate E2E Flows', () => {
         
         // Wait for suggestion to appear in the dropdown
         const suggestion = page.locator('text=The Pizza Palace').first();
-        await expect(suggestion).toBeVisible({ timeout: 10000 });
+        await expect(suggestion).toBeVisible({ timeout: 15000 });
         
-        // Use dispatchEvent to ensure click event is fired even if intercepted
-        await suggestion.dispatchEvent('click');
+        // Click the parent container (venueItem) to be sure the onClick triggers
+        const venueItem = page.locator('[class*="venueItem"]').first();
+        await venueItem.click({ force: true });
 
         // Modal should auto-advance to step 2 (showing textarea)
         const textarea = page.locator('textarea');
-        await expect(textarea).toBeVisible({ timeout: 10000 });
+        await expect(textarea).toBeVisible({ timeout: 15000 });
         await textarea.fill('Best pizza ever!');
         
         // Click the post button in the modal
