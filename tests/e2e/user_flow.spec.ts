@@ -24,15 +24,16 @@ test.describe('PlateMate E2E Flows', () => {
     });
 
     test('should navigate to the profile page', async ({ page }) => {
-        // Find link that goes to /profile
-        await page.locator('a[href="/profile"]').click();
+        // Use sidebar link specifically to avoid strict mode violation (multiple profile links)
+        await page.locator('aside a[href="/profile"]').click();
         await page.waitForURL('**/profile');
         // The mock user name in authAdapter.ts is "Test User"
         await expect(page.locator('h1')).toContainText('Test User');
     });
 
     test('should open the search results and find a restaurant', async ({ page }) => {
-        const searchInput = page.locator('input[placeholder*="Search"]');
+        // Target the search input in the header
+        const searchInput = page.locator('header input[placeholder*="Search"]');
         await searchInput.fill('pizza');
         await searchInput.press('Enter');
 
@@ -41,21 +42,25 @@ test.describe('PlateMate E2E Flows', () => {
     });
 
     test('should create a new review via the floating action button', async ({ page }) => {
-        // Find the FAB - usually has a specific class or icon
-        await page.locator('button:has(.material-symbols-outlined:has-text("add")), button:has-text("Log")').first().click();
+        // Target the FAB specifically by its aria-label
+        await page.locator('button[aria-label="Add Review"]').click();
 
-        await expect(page.getByText(/Log a Meal|Create Review/i)).toBeVisible();
+        // Modal should appear
+        await expect(page.locator('h2')).toContainText(/Log a Meal|Create Review/i);
 
-        // Fill out review
-        await page.fill('input[placeholder*="restaurant"]', 'Pizza Palace');
-        // Click first suggestion if it appears
-        await page.waitForTimeout(1000);
+        // Fill out review - searching for restaurant inside the modal
+        const restaurantInput = page.locator('.modalContent input[placeholder*="restaurant"]');
+        await restaurantInput.fill('Pizza Palace');
+        
+        // Wait for suggestion and click it
         await page.locator('text=Pizza Palace').first().click();
 
-        await page.fill('textarea', 'Best pizza ever!');
-        await page.click('button:has-text("Post"), button:has-text("Create")');
+        await page.locator('textarea').fill('Best pizza ever!');
+        
+        // Click the post button in the modal
+        await page.locator('button:has-text("Post"), button:has-text("Create")').click();
 
-        // Wait for success toast or redirection
+        // Wait for modal to close or toast
         await page.waitForTimeout(2000);
     });
 });
