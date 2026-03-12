@@ -7,16 +7,13 @@ test.describe('PlateMate E2E Flows', () => {
         await page.waitForLoadState('networkidle');
         
         // Use pre-seeded mock user for testing if Cognito isn't configured
-        await page.fill('input[type="email"]', 'test@example.com');
-        await page.fill('input[type="password"]', 'Password123!');
+        await page.fill('input#email', 'test@example.com');
+        await page.fill('input#password', 'Password123!');
         await page.click('button[type="submit"]');
 
-        // Wait for redirect to home
-        await page.waitForURL('**/', { timeout: 15000 });
+        // Wait for redirect to home - looking for the activity feed header
+        await page.waitForSelector('h1:has-text("Activity Feed")', { timeout: 30000 });
         await page.waitForLoadState('networkidle');
-        
-        // Final safety wait for hydration
-        await page.waitForTimeout(3000);
     });
 
     test('should load the landing page and show the activity feed', async ({ page }) => {

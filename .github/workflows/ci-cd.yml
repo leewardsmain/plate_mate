@@ -84,6 +84,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E Tests
+        env:
+          VITE_API_URL: ${{ env.VITE_API_URL }}
         run: npm run test:e2e
 
       - name: Upload E2E Reports

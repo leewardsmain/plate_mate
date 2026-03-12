@@ -24,7 +24,7 @@ export default defineConfig({
         },
     ],
     webServer: {
-        command: process.env.CI ? 'npm run build && npx vite preview --port 5173' : 'npm run dev',
+        command: process.env.CI ? `VITE_API_URL=${process.env.VITE_API_URL} npm run build && npx vite preview --port 5173` : 'npm run dev',
         url: 'http://localhost:5173',
         reuseExistingServer: !process.env.CI,
         timeout: 120000,
