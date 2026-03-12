@@ -29,8 +29,11 @@ test.describe('PlateMate E2E Flows', () => {
     });
 
     test('should open the search results and find a restaurant', async ({ page }) => {
-        // Target the search input in the header
-        const searchInput = page.locator('header input[placeholder*="Search"]');
+        // Search bar might be hidden on mobile, or in a different location.
+        // In our CSS, .searchWrapper is hidden on max-width 768px.
+        // Playwright default is 1280x720, so it should be visible.
+        const searchInput = page.locator('input[placeholder*="Restaurants"]').first();
+        await expect(searchInput).toBeVisible();
         await searchInput.fill('pizza');
         await searchInput.press('Enter');
 
@@ -39,14 +42,18 @@ test.describe('PlateMate E2E Flows', () => {
     });
 
     test('should create a new review via the floating action button', async ({ page }) => {
-        // Target the FAB specifically by its aria-label
-        await page.locator('button[aria-label="Add Review"]').click();
+        // The button is "Log Meal" in top nav (desktop) or FAB (mobile). 
+        // Both have aria-label: "Log Meal" (top) and "Add Review" (FAB).
+        // Let's try to click whichever is visible.
+        const logMealBtn = page.locator('button[aria-label="Log Meal"], button[aria-label="Add Review"]').filter({ visible: true }).first();
+        await logMealBtn.click();
 
         // Modal should appear
         await expect(page.locator('h2')).toContainText(/Log a Meal|Create Review/i);
 
         // Fill out review - searching for restaurant inside the modal
-        const restaurantInput = page.locator('.modalContent input[placeholder*="restaurant"]');
+        // The modal uses RestaurantSearch component too
+        const restaurantInput = page.locator('input[placeholder*="Restaurants"]').last();
         await restaurantInput.fill('Pizza Palace');
         
         // Wait for suggestion and click it
