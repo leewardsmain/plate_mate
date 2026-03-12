@@ -60,6 +60,13 @@ export const RestaurantSearch: React.FC = () => {
         navigate(`/restaurant/${placeId}`);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && query.length > 2) {
+            setIsOpen(false);
+            navigate(`/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}`);
+        }
+    };
+
     return (
         <div className={styles.searchContainer} ref={searchRef}>
             <div className={styles.searchInputs}>
@@ -71,6 +78,7 @@ export const RestaurantSearch: React.FC = () => {
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => query.length > 2 && setIsOpen(true)}
+                        onKeyDown={handleKeyDown}
                     />
                 </div>
                 <div className={styles.locationBar}>

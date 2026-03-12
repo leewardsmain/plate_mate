@@ -57,10 +57,16 @@ test.describe('PlateMate E2E Flows', () => {
         const restaurantInput = page.locator('input[placeholder*="Restaurants"]').last();
         await restaurantInput.fill('Pizza Palace');
         
+        // Wait for suggestion to appear in the dropdown
+        await page.waitForSelector('text=The Pizza Palace', { timeout: 10000 });
+        
         // Wait for suggestion and click it
         // Use force: true because the modal header or overlay might be intercepting clicks 
         // due to layout/animation timing in CI
-        await page.locator('text=Pizza Palace').first().click({ force: true });
+        await page.locator('text=The Pizza Palace').first().click({ force: true });
+
+        // Ensure the selection is processed
+        await page.waitForTimeout(500);
 
         await page.locator('textarea').fill('Best pizza ever!');
         
