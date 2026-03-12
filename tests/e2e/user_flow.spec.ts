@@ -61,9 +61,8 @@ test.describe('PlateMate E2E Flows', () => {
         const suggestion = page.locator('text=The Pizza Palace').first();
         await expect(suggestion).toBeVisible({ timeout: 15000 });
         
-        // Click the parent container (venueItem) to be sure the onClick triggers
-        const venueItem = page.locator('[class*="venueItem"]').first();
-        await venueItem.click({ force: true });
+        // Click the suggestion directly by text to avoid CSS Module class issues
+        await suggestion.click({ force: true });
 
         // Modal should auto-advance to step 2 (showing textarea)
         const textarea = page.locator('textarea');
