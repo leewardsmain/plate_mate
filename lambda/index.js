@@ -29,7 +29,11 @@ exports.handler = async (event) => {
         
         const clientConfig = { region: AWS_REGION };
         if (IS_LOCALSTACK) {
-            clientConfig.endpoint = "http://localhost:4566";
+            // In LocalStack, lambda runs in a container and needs to reach the 'localstack' host
+            const endpoint = process.env.LOCALSTACK_HOSTNAME 
+                ? `http://${process.env.LOCALSTACK_HOSTNAME}:4566`
+                : "http://localstack:4566";
+            clientConfig.endpoint = endpoint;
             clientConfig.forcePathStyle = true;
             clientConfig.credentials = { accessKeyId: "test", secretAccessKey: "test" };
         }
@@ -43,7 +47,10 @@ exports.handler = async (event) => {
         
         const clientConfig = { region: AWS_REGION };
         if (IS_LOCALSTACK) {
-            clientConfig.endpoint = "http://localhost:4566";
+            const endpoint = process.env.LOCALSTACK_HOSTNAME 
+                ? `http://${process.env.LOCALSTACK_HOSTNAME}:4566`
+                : "http://localstack:4566";
+            clientConfig.endpoint = endpoint;
             clientConfig.forcePathStyle = true;
             clientConfig.credentials = { accessKeyId: "test", secretAccessKey: "test" };
         }
