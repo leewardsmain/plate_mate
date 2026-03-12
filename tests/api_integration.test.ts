@@ -47,6 +47,10 @@ describe('Backend API Integration Tests (LocalStack)', () => {
                     bio: "I love testing."
                 })
             });
+            if (res.status === 500) {
+                const body = await res.text();
+                console.error("500 ERROR BODY:", body);
+            }
             expect(res.status).toBe(200);
             const data = await res.json() as any;
             expect(data.message).toBe("Profile updated");
