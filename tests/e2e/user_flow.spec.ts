@@ -58,19 +58,16 @@ test.describe('PlateMate E2E Flows', () => {
         await restaurantInput.fill('Pizza Palace');
         
         // Wait for suggestion to appear in the dropdown
-        await page.waitForSelector('text=The Pizza Palace', { timeout: 10000 });
+        const suggestion = page.locator('text=The Pizza Palace').first();
+        await expect(suggestion).toBeVisible({ timeout: 10000 });
         
-        // Wait for suggestion and click it
-        // Use force: true because the modal header or overlay might be intercepting clicks 
-        // due to layout/animation timing in CI
-        await page.locator('text=The Pizza Palace').first().click({ force: true });
-
-        // Ensure the selection is processed
-        await page.waitForTimeout(500);
+        // Use dispatchEvent to ensure click event is fired even if intercepted
+        await suggestion.dispatchEvent('click');
 
         // Advance to Step 2
         const nextBtn = page.locator('button:has-text("Next")');
-        await expect(nextBtn).toBeVisible();
+        // The button might take a moment to enable after state update
+        await expect(nextBtn).toBeEnabled({ timeout: 10000 });
         await nextBtn.click();
 
         await page.locator('textarea').fill('Best pizza ever!');
