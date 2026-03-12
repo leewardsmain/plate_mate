@@ -22,6 +22,12 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ["*"]
+            AllowedMethods: ["PUT", "POST", "GET"]
+            AllowedOrigins: ["*"]
+            MaxAge: 3000
 
   # 1.5 Cognito User Pool
   UserPool:
@@ -183,6 +189,7 @@ Resources:
           RESTAURANTS_TABLE: !Ref RestaurantsTable
           GOOGLE_API_KEY: !Ref GoogleApiKey
           USE_MOCK_DATA: "false"
+          CLOUDFRONT_DOMAIN: !GetAtt CloudFrontDistribution.DomainName
       Events:
         ProxyResource:
           Type: Api
@@ -206,7 +213,7 @@ Outputs:
     Value: !Ref CloudFrontDistribution
     Description: ID of the CloudFront distribution.
   ApiEndpoint:
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
     Description: production URL of the API Gateway endpoint.
   UserPoolId:
     Value: !Ref UserPool

@@ -10,20 +10,32 @@ const {
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
-const ddbClient = new DynamoDBClient({
-    region: process.env.AWS_REGION || 'us-east-1',
-    credentials: { accessKeyId: 'MOCK_ACCESS_KEY', secretAccessKey: 'MOCK_SECRET_KEY' }
-});
-const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
-const s3Client = new S3Client({
-    region: process.env.AWS_REGION || 'us-east-1',
-    credentials: { accessKeyId: 'MOCK_ACCESS_KEY', secretAccessKey: 'MOCK_SECRET_KEY' }
-});
-
+// Environment variables
 const REVIEWS_TABLE = process.env.REVIEWS_TABLE || "platemate-reviews";
 const USERS_TABLE = process.env.USERS_TABLE || "platemate-users";
-const AVATAR_BUCKET = process.env.AVATAR_BUCKET || "platemate-frontend-app";
+const AVATAR_BUCKET = process.env.AVATAR_BUCKET || "platemate-assets";
 const RESTAURANTS_TABLE = process.env.RESTAURANTS_TABLE || "platemate-restaurants";
+const IS_LOCALSTACK = process.env.IS_LOCALSTACK === "true";
+const AWS_REGION = process.env.AWS_REGION || 'us-east-1';
+
+// Client configuration
+const clientConfig = {
+    region: AWS_REGION,
+};
+
+// Use LocalStack endpoint if running in LocalStack
+if (IS_LOCALSTACK) {
+    clientConfig.endpoint = "http://localhost:4566";
+    clientConfig.forcePathStyle = true; // Required for LocalStack S3
+    clientConfig.credentials = {
+        accessKeyId: "test",
+        secretAccessKey: "test"
+    };
+}
+
+const ddbClient = new DynamoDBClient(clientConfig);
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
+const s3Client = new S3Client(clientConfig);
 
 exports.handler = async (event) => {
     console.log("Event:", JSON.stringify(event));
@@ -32,19 +44,14 @@ exports.handler = async (event) => {
     const body = bodyStr ? JSON.parse(bodyStr) : {};
 
     // Robust path normalization for LocalStack/APIGateway
-    // 1. Try to use pathParameters.proxy if available (most reliable for /{proxy+})
     if (pathParameters && pathParameters.proxy) {
         path = '/' + pathParameters.proxy;
     } else {
-        // 2. Fallback: Strip common prefixes like stage name or /_user_request_
-        // This handles cases like /dev/reviews or /_user_request_/reviews (case-insensitive)
         path = path.replace(/^\/(?:dev|prod|stage)\//i, '/');
         path = path.replace(/^\/_user_request_\//i, '/');
-        // Handle cases where it might be /dev/_user_request_/reviews
         path = path.replace(/^\/(?:dev|prod|stage)\/_user_request_\//i, '/');
     }
 
-    // 3. Remove trailing slashes and normalize
     if (path.length > 1 && path.endsWith('/')) {
         path = path.slice(0, -1);
     }
@@ -64,14 +71,11 @@ exports.handler = async (event) => {
 
     try {
         // --- REVIEWS ROUTES ---
-
-        // GET /reviews
         if (httpMethod === 'GET' && path === '/reviews') {
             const result = await ddbDocClient.send(new ScanCommand({ TableName: REVIEWS_TABLE }));
             return { statusCode: 200, headers, body: JSON.stringify(result.Items) };
         }
 
-        // POST /reviews
         else if (httpMethod === 'POST' && path === '/reviews') {
             await ddbDocClient.send(new PutCommand({
                 TableName: REVIEWS_TABLE,
@@ -83,7 +87,6 @@ exports.handler = async (event) => {
             return { statusCode: 201, headers, body: JSON.stringify({ message: "Review created" }) };
         }
 
-        // DELETE /reviews/{id}
         else if (httpMethod === 'DELETE' && path.startsWith('/reviews/')) {
             const reviewId = path.split('/').pop();
             await ddbDocClient.send(new DeleteCommand({
@@ -93,7 +96,6 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Review deleted" }) };
         }
 
-        // POST /reviews/{id}/like
         else if (httpMethod === 'POST' && path.includes('/like')) {
             const reviewId = path.split('/')[2];
             const getRes = await ddbDocClient.send(new GetCommand({
@@ -124,7 +126,6 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ likedBy, likes: likedBy.length }) };
         }
 
-        // POST /reviews/{id}/comments
         else if (httpMethod === 'POST' && path.includes('/comments')) {
             const reviewId = path.split('/')[2];
             const newComment = {
@@ -153,7 +154,6 @@ exports.handler = async (event) => {
             return { statusCode: 201, headers, body: JSON.stringify(newComment) };
         }
 
-        // PUT /reviews/{id} (Update)
         else if (httpMethod === 'PUT' && path.startsWith('/reviews/')) {
             const reviewId = path.split('/').pop();
             await ddbDocClient.send(new UpdateCommand({
@@ -171,10 +171,7 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Review updated" }) };
         }
 
-
         // --- USERS ROUTES ---
-
-        // GET /users/{id}
         else if (httpMethod === 'GET' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
             const result = await ddbDocClient.send(new GetCommand({
@@ -184,7 +181,6 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify(result.Item || {}) };
         }
 
-        // PUT /users/{id}
         else if (httpMethod === 'PUT' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
             await ddbDocClient.send(new PutCommand({
@@ -194,7 +190,6 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Profile updated" }) };
         }
 
-        // DELETE /users/{id}
         else if (httpMethod === 'DELETE' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
             await ddbDocClient.send(new DeleteCommand({
@@ -204,11 +199,19 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Account deleted" }) };
         }
 
-        // POST /users/{id}/avatar (Presigned URL)
-        else if (httpMethod === 'POST' && path.includes('/avatar')) {
-            const userId = path.split('/')[2];
-            const fileName = body.fileName || "avatar.jpg";
-            const key = `avatars/${userId}/${Date.now()}_${fileName}`;
+        // Helper for S3 presigned URLs
+        else if (httpMethod === 'POST' && (path.includes('/avatar') || path.includes('/meal-photo') || path.includes('/photo-url'))) {
+            let key;
+            if (path.includes('/avatar')) {
+                const userId = path.split('/')[2];
+                key = `avatars/${userId}/${Date.now()}_${body.fileName || "avatar.jpg"}`;
+            } else if (path.includes('/meal-photo')) {
+                const userId = path.split('/')[2];
+                key = `meals/${userId}/${Date.now()}_${body.fileName || "meal.jpg"}`;
+            } else { // /photo-url for restaurants
+                const placeId = path.split('/')[2];
+                key = `meals/headers/${placeId}/${Date.now()}_${body.fileName || "header.jpg"}`;
+            }
 
             const command = new PutObjectCommand({
                 Bucket: AVATAR_BUCKET,
@@ -217,35 +220,17 @@ exports.handler = async (event) => {
             });
 
             let uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
-            // Fix LocalStack internal IP issue for host access
-            uploadUrl = uploadUrl.replace(/https?:\/\/(?:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|localstack):4566/, 'http://localhost:4566');
+            let publicUrl;
 
-            const publicUrl = `http://localhost:4566/${AVATAR_BUCKET}/${key}`;
-
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({ uploadUrl, publicUrl, key })
-            };
-        }
-
-        // POST /users/{id}/meal-photo (Presigned URL for Dish Photos)
-        else if (httpMethod === 'POST' && path.includes('/meal-photo')) {
-            const userId = path.split('/')[2];
-            const fileName = body.fileName || "meal.jpg";
-            const key = `meals/${userId}/${Date.now()}_${fileName}`;
-
-            const command = new PutObjectCommand({
-                Bucket: AVATAR_BUCKET, // Reuse the same frontend bucket
-                Key: key,
-                ContentType: body.contentType || 'image/jpeg'
-            });
-
-            let uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
-            // Fix LocalStack internal IP issue for host access
-            uploadUrl = uploadUrl.replace(/https?:\/\/(?:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|localstack):4566/, 'http://localhost:4566');
-
-            const publicUrl = `http://localhost:4566/${AVATAR_BUCKET}/${key}`;
+            if (IS_LOCALSTACK) {
+                // Adjust LocalStack URL for browser access
+                uploadUrl = uploadUrl.replace(/https?:\/\/(?:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|localstack):4566/, 'http://localhost:4566');
+                publicUrl = `http://localhost:4566/${AVATAR_BUCKET}/${key}`;
+            } else if (process.env.CLOUDFRONT_DOMAIN) {
+                publicUrl = `https://${process.env.CLOUDFRONT_DOMAIN}/${key}`;
+            } else {
+                publicUrl = `https://${AVATAR_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${key}`;
+            }
 
             return {
                 statusCode: 200,
@@ -255,23 +240,17 @@ exports.handler = async (event) => {
         }
 
         // --- RESTAURANTS ROUTES ---
-
-        // PUT /restaurants/{id} (Update Cached Restaurant Attributes)
         else if (httpMethod === 'PUT' && path.startsWith('/restaurants/')) {
             const placeId = path.split('/').pop();
-
-            // First get the existing record, or it will fail if it's not cached yet
             const getRes = await ddbDocClient.send(new GetCommand({
                 TableName: RESTAURANTS_TABLE,
                 Key: { placeId }
             }));
 
-            // If not cached, we can't update it yet. The frontend should fetch it first.
             if (!getRes.Item) {
                 return { statusCode: 404, headers, body: JSON.stringify({ error: "Restaurant not found in cache. Fetch it first." }) };
             }
 
-            // Create update expression dynamically based on body keys
             const updateKeys = Object.keys(body);
             if (updateKeys.length === 0) {
                 return { statusCode: 400, headers, body: JSON.stringify({ error: "No update fields provided" }) };
@@ -292,48 +271,16 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Restaurant updated" }) };
         }
 
-        // POST /restaurants/{id}/photo-url (Presigned URL for Header Photos)
-        else if (httpMethod === 'POST' && path.includes('/photo-url')) {
-            const placeId = path.split('/')[2];
-            const fileName = body.fileName || "header.jpg";
-            const key = `meals/headers/${placeId}/${Date.now()}_${fileName}`;
-
-            const command = new PutObjectCommand({
-                Bucket: AVATAR_BUCKET,
-                Key: key,
-                ContentType: body.contentType || 'image/jpeg'
-            });
-
-            let uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
-            // Fix LocalStack internal IP issue for host access
-            uploadUrl = uploadUrl.replace(/https?:\/\/(?:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|localstack):4566/, 'http://localhost:4566');
-
-            const publicUrl = `http://localhost:4566/${AVATAR_BUCKET}/${key}`;
-
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({ uploadUrl, publicUrl, key })
-            };
-        }
-
-        // GET /restaurants/search?q=...&location=...
         else if (httpMethod === 'GET' && path === '/restaurants/search') {
             const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-            console.log(`Using Google API Key starting with: ${GOOGLE_API_KEY ? GOOGLE_API_KEY.substring(0, 4) : 'MISSING'}`);
-
             let query = event.queryStringParameters?.q;
             const location = event.queryStringParameters?.location;
 
             if (!query) return { statusCode: 400, headers, body: JSON.stringify({ error: "Query required" }) };
-
-            if (location) {
-                query = `${query} in ${location}`;
-            }
+            if (location) query = `${query} in ${location}`;
 
             const googleUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${GOOGLE_API_KEY}`;
-            console.log(`Fetching from Google: ${googleUrl}`);
-
+            
             let data = { status: 'UNKNOWN', results: [] };
             try {
                 const response = await fetch(googleUrl);
@@ -342,49 +289,20 @@ exports.handler = async (event) => {
                 console.error("Fetch to Google failed:", err);
             }
 
-            console.log(`Google API Response Data: ${JSON.stringify(data)}`);
-            console.log(`Google API Status: ${data.status}, Results count: ${data.results ? data.results.length : 0}`);
-
             const results = data.results || [];
 
-            // Mock Data Fallback for testing when API key is invalid/missing
             if ((results.length === 0 || data.status !== 'OK') && process.env.USE_MOCK_DATA === "true") {
-                console.log("Using Mock Data Fallback for search results");
                 const mockResults = [
-                    {
-                        place_id: "mock_1",
-                        name: "The Pizza Palace",
-                        formatted_address: "123 Cheese St, San Francisco, CA",
-                        rating: 4.5,
-                        price_level: 2,
-                        opening_hours: { open_now: true }
-                    },
-                    {
-                        place_id: "mock_2",
-                        name: "Burger Haven",
-                        formatted_address: "456 Patty Ln, San Francisco, CA",
-                        rating: 4.2,
-                        price_level: 1,
-                        opening_hours: { open_now: false }
-                    },
-                    {
-                        place_id: "mock_3",
-                        name: "Sushi Zen",
-                        formatted_address: "789 Maki Rd, San Francisco, CA",
-                        rating: 4.8,
-                        price_level: 3,
-                        opening_hours: { open_now: true }
-                    }
+                    { place_id: "mock_1", name: "The Pizza Palace", formatted_address: "123 Cheese St, San Francisco, CA", rating: 4.5, price_level: 2, opening_hours: { open_now: true } },
+                    { place_id: "mock_2", name: "Burger Haven", formatted_address: "456 Patty Ln, San Francisco, CA", rating: 4.2, price_level: 1, opening_hours: { open_now: false } },
+                    { place_id: "mock_3", name: "Sushi Zen", formatted_address: "789 Maki Rd, San Francisco, CA", rating: 4.8, price_level: 3, opening_hours: { open_now: true } }
                 ];
-                console.log(`Returning ${mockResults.length} MOCK results to client`);
                 return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
             }
 
-            console.log(`Returning ${results.length} results to client`);
             return { statusCode: 200, headers, body: JSON.stringify(results) };
         }
 
-        // GET /restaurants/photo/{photoRef}
         else if (httpMethod === 'GET' && path.includes('/photo/')) {
             const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
             const photoRef = path.split('/').pop();
@@ -408,15 +326,10 @@ exports.handler = async (event) => {
             };
         }
 
-        // GET /restaurants/{placeId}
         else if (httpMethod === 'GET' && path.startsWith('/restaurants/')) {
             const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-            const RESTAURANTS_TABLE = process.env.RESTAURANTS_TABLE || "platemate-restaurants";
             const placeId = path.split('/').pop();
 
-            console.log(`Checking cache for placeId: ${placeId}`);
-
-            // 1. Try Cache
             try {
                 const cacheRes = await ddbDocClient.send(new GetCommand({
                     TableName: RESTAURANTS_TABLE,
@@ -424,16 +337,12 @@ exports.handler = async (event) => {
                 }));
 
                 if (cacheRes.Item) {
-                    console.log(`Cache Hit for ${placeId}`);
                     return { statusCode: 200, headers, body: JSON.stringify(cacheRes.Item) };
                 }
             } catch (err) {
                 console.error("Cache Read Error:", err);
             }
 
-            console.log(`Cache Miss for ${placeId}, fetching from Google...`);
-
-            // 2. Fetch from Google if cache miss or error
             let data = { result: null, status: 'UNKNOWN' };
             try {
                 const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`);
@@ -444,40 +353,17 @@ exports.handler = async (event) => {
 
             let result = data.result || null;
 
-            // Mock Data Fallback for Details
             if (!result && process.env.USE_MOCK_DATA === "true") {
-                console.log(`Using Mock Data Fallback for details of ${placeId}`);
                 const mockDetails = {
-                    mock_1: {
-                        name: "The Pizza Palace",
-                        formatted_address: "123 Cheese St, San Francisco, CA",
-                        rating: 4.5,
-                        price_level: 2,
-                        formatted_phone_number: "(555) 123-4567",
-                        website: "https://pizzapalace.example.com",
-                        opening_hours: { weekday_text: ["Monday: 11:00 AM – 10:00 PM"] }
-                    },
-                    mock_2: {
-                        name: "Burger Haven",
-                        formatted_address: "456 Pattie Ln, San Francisco, CA",
-                        rating: 4.2,
-                        price_level: 1,
-                        formatted_phone_number: "(555) 987-6543"
-                    },
-                    mock_3: {
-                        name: "Sushi Zen",
-                        formatted_address: "789 Maki Rd, San Francisco, CA",
-                        rating: 4.8,
-                        price_level: 3
-                    }
+                    mock_1: { name: "The Pizza Palace", formatted_address: "123 Cheese St, San Francisco, CA", rating: 4.5, price_level: 2, formatted_phone_number: "(555) 123-4567", website: "https://pizzapalace.example.com", opening_hours: { weekday_text: ["Monday: 11:00 AM – 10:00 PM"] } },
+                    mock_2: { name: "Burger Haven", formatted_address: "456 Pattie Ln, San Francisco, CA", rating: 4.2, price_level: 1, formatted_phone_number: "(555) 987-6543" },
+                    mock_3: { name: "Sushi Zen", formatted_address: "789 Maki Rd, San Francisco, CA", rating: 4.8, price_level: 3 }
                 };
                 result = mockDetails[placeId] || { name: "Unknown Mock Restaurant", place_id: placeId };
             }
 
-            // 3. Save to Cache if we have a valid result
             if (result && result.name) {
                 try {
-                    console.log(`Saving ${placeId} to cache...`);
                     await ddbDocClient.send(new PutCommand({
                         TableName: RESTAURANTS_TABLE,
                         Item: {
@@ -494,7 +380,6 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify(result || {}) };
         }
 
-        console.log(`No route matched for Path: ${path}, Method: ${httpMethod}`);
         return {
             statusCode: 404,
             headers,

@@ -2,7 +2,15 @@ import { test, expect } from '@playwright/test';
 
 test.describe('PlateMate E2E Flows', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/login');
+        
+        // Use pre-seeded mock user for testing if Cognito isn't configured
+        await page.fill('input[type="email"]', 'test@example.com');
+        await page.fill('input[type="password"]', 'Password123!');
+        await page.click('button[type="submit"]');
+
+        // Wait for redirect to home
+        await expect(page).toHaveURL('/');
     });
 
     test('should load the landing page and show the activity feed', async ({ page }) => {

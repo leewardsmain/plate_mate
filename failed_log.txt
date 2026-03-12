@@ -1,0 +1,93 @@
+﻿deploy	Deploy Backend (AWS SAM)	∩╗┐2026-03-10T15:51:28.7048790Z ##[group]Run sam build
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7049079Z [36;1msam build[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7049413Z [36;1msam deploy --no-confirm-changeset --no-fail-on-empty-changeset \[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7049805Z [36;1m  --stack-name platemate-pro-stack \[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7050114Z [36;1m  --capabilities CAPABILITY_IAM \[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7050374Z [36;1m  --resolve-s3 \[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7051210Z [36;1m  --parameter-overrides GoogleApiKey=***[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7051508Z [36;1m[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7051723Z [36;1m# Extract outputs[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7052354Z [36;1mAPI_URL=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7053412Z [36;1mBUCKET_NAME=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" --output text)[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7054535Z [36;1mDISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7055644Z [36;1mUSER_POOL_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7056693Z [36;1mUSER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7057514Z [36;1m[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7057729Z [36;1mecho "api_url=$API_URL" >> $GITHUB_OUTPUT[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7058065Z [36;1mecho "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7058432Z [36;1mecho "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7058807Z [36;1mecho "user_pool_id=$USER_POOL_ID" >> $GITHUB_OUTPUT[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7059192Z [36;1mecho "user_pool_client_id=$USER_POOL_CLIENT_ID" >> $GITHUB_OUTPUT[0m
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7086645Z shell: /usr/bin/bash -e {0}
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7086911Z env:
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7087101Z   AWS_DEFAULT_REGION: us-east-1
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7087335Z   AWS_REGION: us-east-1
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7087644Z   AWS_ACCESS_KEY_ID: ***
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7087962Z   AWS_SECRET_ACCESS_KEY: ***
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:28.7088182Z ##[endgroup]
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6409394Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6410203Z 	SAM CLI now collects telemetry to better understand customer needs.
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6410659Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6411139Z 	You can OPT OUT and disable telemetry collection by setting the
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6411819Z 	environment variable SAM_CLI_TELEMETRY=0 in your shell.
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6412353Z 	Thanks for your help!
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6412612Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6414954Z 	Learn More: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-telemetry.html
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:33.6415778Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:34.0483766Z Building codeuri: /home/runner/work/plate_mate/plate_mate/lambda runtime: nodejs20.x architecture: x86_64 functions: ApiLambdaFunction
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:34.0646315Z  Running NodejsNpmBuilder:NpmPack
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:34.3435686Z  Running NodejsNpmBuilder:CopyNpmrcAndLockfile
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:34.3436307Z  Running NodejsNpmBuilder:CopySource
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:34.3440581Z  Running NodejsNpmBuilder:NpmInstall
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7181523Z  Running NodejsNpmBuilder:NpmTest
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7182168Z  Running NodejsNpmBuilder:CleanUpNpmrc
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7182633Z  Running NodejsNpmBuilder:LockfileCleanUp
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7270208Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7270778Z Build Succeeded
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7271196Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7271458Z Built Artifacts  : .aws-sam/build
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7272003Z Built Template   : .aws-sam/build/template.yaml
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7272348Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7272525Z Commands you can use next
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7272908Z =========================
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7273677Z [*] Validate SAM template: sam validate
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7274219Z [*] Invoke Function: sam local invoke
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7274975Z [*] Test Function in the Cloud: sam sync --stack-name {{stack-name}} --watch
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.7275703Z [*] Deploy: sam deploy --guided
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.8195572Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.8196358Z SAM CLI update available (1.155.2); (1.154.0 installed)
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:38.8197586Z To download: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:41.2300380Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:41.2301506Z 	Managed S3 bucket: aws-sam-cli-managed-default-samclisourcebucket-zhcs6pnc7hus
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:41.2302505Z 	Auto resolution of buckets can be turned off by setting resolve_s3=False
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:41.2303206Z 	To use a specific S3 bucket, set --s3-bucket=<bucket_name>
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:41.2303796Z 	Above settings can be stored in samconfig.toml
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.3246873Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.5638511Z 	Uploading to 4a6e81819a6989038ccdd08d8b376d59  1048576 / 4248005  (24.68%)
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.6126728Z 	Uploading to 4a6e81819a6989038ccdd08d8b376d59  2097152 / 4248005  (49.37%)
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.6584640Z 	Uploading to 4a6e81819a6989038ccdd08d8b376d59  3145728 / 4248005  (74.05%)
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8274534Z 	Uploading to 4a6e81819a6989038ccdd08d8b376d59  4194304 / 4248005  (98.74%)
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8275525Z 	Uploading to 4a6e81819a6989038ccdd08d8b376d59  4248005 / 4248005  (100.00%)
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8588344Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8588952Z 	Deploying with following values
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8589519Z 	===============================
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8590084Z 	Stack name                   : platemate-pro-stack
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8590546Z 	Region                       : us-east-1
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8591255Z 	Confirm changeset            : False
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8591760Z 	Disable rollback             : False
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8592531Z 	Deployment s3 bucket         : aws-sam-cli-managed-default-samclisourcebucket-zhcs6pnc7hus
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8593376Z 	Capabilities                 : ["CAPABILITY_IAM"]
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8593980Z 	Parameter overrides          : {"GoogleApiKey": "*****"}
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8594539Z 	Signing Profiles             : {}
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8594810Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8594982Z Initiating deployment
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8595429Z =====================
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:42.8595638Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:43.7758714Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:43.7759528Z 	Uploading to eb17bd9ba0f38323f72ac0d9130925b1.template  7008 / 7008  (100.00%)
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:44.0985519Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:44.0985602Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:44.0986506Z Waiting for changeset to be created..
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:44.0986918Z 
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:54.6046122Z Error: Failed to create changeset for the stack: platemate-pro-stack, ex: Waiter ChangeSetCreateComplete failed: Waiter encountered a terminal failure state: For expression "Status" we matched expected path: "FAILED" Status: FAILED. Reason: The following hook(s)/validation failed: [AWS::EarlyValidation::PropertyValidation]. To troubleshoot Early Validation errors, use the DescribeEvents API for detailed failure information.
+deploy	Deploy Backend (AWS SAM)	2026-03-10T15:51:54.8154936Z ##[error]Process completed with exit code 1.

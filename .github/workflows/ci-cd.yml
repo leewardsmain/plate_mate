@@ -2,7 +2,7 @@ name: PlateMate CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
   pull_request:
     branches: [ main ]
 
@@ -52,8 +52,8 @@ jobs:
           awslocal iam create-role --role-name lambda-role --assume-role-policy-document '{"Version": "2012-10-17","Statement": [{ "Effect": "Allow", "Principal": {"Service": "lambda.amazonaws.com"}, "Action": "sts:AssumeRole"}]}'
           
           # Create Lambda Function
-          cd lambda && zip -r ../lambda.zip . && cd ..
-          awslocal lambda create-function --function-name platemate-api-handler --runtime nodejs20.x --handler index.handler --role arn:aws:iam::000000000000:role/lambda-role --zip-file fileb://lambda.zip --environment "Variables={REVIEWS_TABLE=platemate-reviews,USERS_TABLE=platemate-users,RESTAURANTS_TABLE=platemate-restaurants,AVATAR_BUCKET=platemate-assets,USE_MOCK_DATA=true}"
+          cd lambda && npm install && zip -r ../lambda.zip . && cd ..
+          awslocal lambda create-function --function-name platemate-api-handler --runtime nodejs20.x --handler index.handler --role arn:aws:iam::000000000000:role/lambda-role --zip-file fileb://lambda.zip --environment "Variables={REVIEWS_TABLE=platemate-reviews,USERS_TABLE=platemate-users,RESTAURANTS_TABLE=platemate-restaurants,AVATAR_BUCKET=platemate-assets,USE_MOCK_DATA=true,IS_LOCALSTACK=true}"
           
           # Setup API Gateway
           API_ID=$(awslocal apigateway create-rest-api --name 'PlateMate API' --query 'id' --output text)
@@ -90,10 +90,10 @@ jobs:
           echo "Ref Name: ${{ github.ref_name }}"
 
   deploy:
-    name: Deploy to Production
+    name: Deploy to AWS
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref_name == 'main'
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'dev')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -114,22 +114,31 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Set Environment Variables
+        id: set_env
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "stack_name=platemate-pro-stack" >> $GITHUB_OUTPUT
+          else
+            echo "stack_name=platemate-dev-stack" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy Backend (AWS SAM)
         id: sam_deploy
         run: |
           sam build
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
-            --stack-name platemate-pro-stack \
+            --stack-name ${{ steps.set_env.outputs.stack_name }} \
             --capabilities CAPABILITY_IAM \
             --resolve-s3 \
             --parameter-overrides GoogleApiKey=${{ secrets.GOOGLE_API_KEY }}
           
           # Extract outputs
-          API_URL=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)
-          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" --output text)
-          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
-          USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
-          USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name platemate-pro-stack --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)
+          API_URL=$(aws cloudformation describe-stacks --stack-name ${{ steps.set_env.outputs.stack_name }} --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)
+          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name ${{ steps.set_env.outputs.stack_name }} --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" --output text)
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name ${{ steps.set_env.outputs.stack_name }} --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
+          USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name ${{ steps.set_env.outputs.stack_name }} --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
+          USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name ${{ steps.set_env.outputs.stack_name }} --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)
           
           echo "api_url=$API_URL" >> $GITHUB_OUTPUT
           echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
