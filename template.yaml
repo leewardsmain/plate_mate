@@ -5,8 +5,15 @@ Description: 'PlateMate Production Infrastructure'
 Parameters:
   GoogleApiKey:
     Type: String
+    Default: ""
     Description: Google Maps/Places API Key
     NoEcho: true
+  UseMockData:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Whether to use mock data for restaurant searches if API fails or is missing
+
   ProjectName:
     Type: String
     Default: platemate
@@ -184,7 +191,7 @@ Resources:
           AVATAR_BUCKET: !Ref FrontendBucket
           RESTAURANTS_TABLE: !Ref RestaurantsTable
           GOOGLE_API_KEY: !Ref GoogleApiKey
-          USE_MOCK_DATA: "false"
+          USE_MOCK_DATA: !Ref UseMockData
           CLOUDFRONT_DOMAIN: !GetAtt CloudFrontDistribution.DomainName
       Events:
         ProxyResource:
