@@ -25,6 +25,7 @@ Resources:
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !Sub "${ProjectName}-frontend-${AWS::AccountId}"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
@@ -71,6 +72,7 @@ Resources:
     Properties:
       OriginAccessControlConfig:
         Description: "OAC for PlateMate Frontend"
+        Name: !Sub "${ProjectName}-frontend-oac-${AWS::AccountId}"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -103,6 +105,7 @@ Resources:
 
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
+    DependsOn: FrontendBucket
     Properties:
       Bucket: !Ref FrontendBucket
       PolicyDocument:
