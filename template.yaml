@@ -13,6 +13,10 @@ Parameters:
     Default: "true"
     AllowedValues: ["true", "false"]
     Description: Whether to use mock data for restaurant searches if API fails or is missing
+  CodeBucket:
+    Type: String
+    Default: "platemate-frontend-app"
+    Description: S3 bucket where Lambda code is uploaded
 
   ProjectName:
     Type: String
@@ -175,7 +179,7 @@ Resources:
       FunctionName: !Sub "${ProjectName}-api-handler"
       Handler: index.handler
       Runtime: nodejs20.x
-      CodeUri: ./lambda
+      CodeUri: !Sub "s3://${CodeBucket}/lambda.zip"
       MemorySize: 512
       Timeout: 30
       Policies:

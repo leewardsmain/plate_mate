@@ -127,6 +127,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Prepare Lambda and S3
+        run: |
+          # Create zip
+          cd lambda && zip -r ../lambda.zip . && cd ..
+          # Ensure bucket exists (using the same pattern as the template)
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          # We use platemate-frontend-app as the prefix to match the template's logic or a known bucket
+          # But the template uses: BucketName: !Sub "${ProjectName}-frontend-${AWS::AccountId}"
+          # The CodeUri expects: s3://platemate-frontend-app/lambda.zip
+          # Let's create exactly that bucket for the code
+          aws s3 mb s3://platemate-frontend-app || true
+          # Upload code
+          aws s3 cp lambda.zip s3://platemate-frontend-app/lambda.zip
+
       - name: Set Environment Variables
         id: set_env
         run: |
@@ -144,7 +158,7 @@ jobs:
             --stack-name ${{ steps.set_env.outputs.stack_name }} \
             --capabilities CAPABILITY_IAM \
             --resolve-s3 \
-            --parameter-overrides GoogleApiKey=${{ secrets.GOOGLE_API_KEY }}
+            --parameter-overrides GoogleApiKey=${{ secrets.GOOGLE_API_KEY }},UseMockData=false
           
           # Extract outputs
           API_URL=$(aws cloudformation describe-stacks --stack-name ${{ steps.set_env.outputs.stack_name }} --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)
