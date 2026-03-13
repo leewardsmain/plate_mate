@@ -159,7 +159,7 @@ jobs:
             --stack-name ${{ steps.set_env.outputs.stack_name }} \
             --capabilities CAPABILITY_IAM \
             --resolve-s3 \
-            --parameter-overrides GoogleApiKey=${{ secrets.GOOGLE_API_KEY }},UseMockData=false,LambdaCodeBucket=$CODE_BUCKET,LambdaCodeKey=lambda.zip
+            --parameter-overrides "GoogleApiKey=${{ secrets.GOOGLE_API_KEY }},UseMockData=false,LambdaCodeBucket=${CODE_BUCKET},LambdaCodeKey=lambda.zip"
           
           # Extract outputs
           API_URL=$(aws cloudformation describe-stacks --stack-name ${{ steps.set_env.outputs.stack_name }} --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)

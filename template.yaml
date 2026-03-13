@@ -15,6 +15,7 @@ Parameters:
     Description: Whether to use mock data for restaurant searches if API fails or is missing
   LambdaCodeBucket:
     Type: String
+    Default: "platemate-code-default"
     Description: S3 bucket where Lambda code is uploaded
   LambdaCodeKey:
     Type: String
