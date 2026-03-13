@@ -25,7 +25,6 @@ Resources:
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${ProjectName}-frontend-${AWS::AccountId}"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
@@ -72,7 +71,6 @@ Resources:
     Properties:
       OriginAccessControlConfig:
         Description: "OAC for PlateMate Frontend"
-        Name: !Sub "${ProjectName}-frontend-oac"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -105,7 +103,6 @@ Resources:
 
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
-    DependsOn: FrontendBucket
     Properties:
       Bucket: !Ref FrontendBucket
       PolicyDocument:
@@ -166,11 +163,6 @@ Resources:
   # 5. Lambda Function (using Serverless Function for SAM features)
   ApiLambdaFunction:
     Type: AWS::Serverless::Function
-    DependsOn: 
-      - UsersTable
-      - ReviewsTable
-      - RestaurantsTable
-      - CloudFrontDistribution
     Properties:
       FunctionName: !Sub "${ProjectName}-api-handler"
       Handler: index.handler
