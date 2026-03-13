@@ -20,24 +20,56 @@ aws s3 mb s3://platemate-frontend-app --endpoint-url $ENDPOINT 2>$null
 New-Item -Path "cors.json" -ItemType "file" -Value '{"CORSRules":[{"AllowedHeaders":["*"],"AllowedMethods":["PUT","GET","POST"],"AllowedOrigins":["*"],"ExposeHeaders":[]}]}' -Force | Out-Null
 aws s3api put-bucket-cors --bucket platemate-frontend-app --cors-configuration file://cors.json --endpoint-url $ENDPOINT
 
-Write-Host "--- Uploading Lambda Code ---" -ForegroundColor Cyan
-aws s3 cp lambda.zip s3://platemate-frontend-app/lambda.zip --endpoint-url $ENDPOINT
+# 1. Package the template (handles zipping ./lambda and uploading to S3)
+Write-Host "--- Packaging Template ---" -ForegroundColor Cyan
+aws cloudformation package `
+    --template-file template.yaml `
+    --s3-bucket platemate-frontend-app `
+    --output-template-file packaged.yaml `
+    --endpoint-url $ENDPOINT
 
+# 2. Deploy the packaged template
 Write-Host "--- Deploying CloudFormation Stack ---" -ForegroundColor Cyan
+
+# Load from .env.local if available
+if (Test-Path ".env.local") {
+    Get-Content ".env.local" | ForEach-Object {
+        if ($_ -match "^GOOGLE_API_KEY=(.*)") {
+            $env:GOOGLE_API_KEY = $matches[1].Trim()
+        }
+    }
+}
+
+$googleKey = $env:GOOGLE_API_KEY
+$useMock = "true"
+
+if ($googleKey) {
+    $useMock = "false"
+    Write-Host "GOOGLE_API_KEY detected. Live restaurant lookup ENABLED." -ForegroundColor Green
+} else {
+    Write-Host "GOOGLE_API_KEY not found. Falling back to MOCK data for restaurants." -ForegroundColor Yellow
+}
+
 aws --no-cli-pager cloudformation deploy `
     --stack-name platemate-local-v2 `
-    --template-file template.yaml `
+    --template-file packaged.yaml `
     --capabilities CAPABILITY_NAMED_IAM `
-    --endpoint-url $ENDPOINT
+    --endpoint-url $ENDPOINT `
+    --parameter-overrides GoogleApiKey="$googleKey" UseMockData="$useMock"
 
 
 Write-Host ""
 Write-Host "--- Deployment Complete ---" -ForegroundColor Green
 
-# Fetch the API URL from outputs
-$outputs = aws --no-cli-pager cloudformation describe-stacks --stack-name platemate-local-v2 --query "Stacks[0].Outputs" --output json --endpoint-url $ENDPOINT | ConvertFrom-Json
+# Fetch the API ID directly for reliable routing
+$apiId = aws apigateway get-rest-apis --query "items[0].id" --output text --endpoint-url $ENDPOINT
 
-$apiUrl = ($outputs | Where-Object { $_.OutputKey -eq "ApiEndpoint" }).OutputValue
+if (-not $apiId -or $apiId -eq "None") {
+    Write-Error "Failed to retrieve API ID."
+    exit 1
+}
+
+$apiUrl = "http://localhost:4566/restapis/$apiId/Prod/_user_request_"
 
 Write-Host "Your Local API URL is: " -NoNewline
 Write-Host $apiUrl -ForegroundColor Yellow

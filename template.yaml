@@ -13,14 +13,6 @@ Parameters:
     Default: "true"
     AllowedValues: ["true", "false"]
     Description: Whether to use mock data for restaurant searches if API fails or is missing
-  LambdaCodeBucket:
-    Type: String
-    Default: "platemate-code-default"
-    Description: S3 bucket where Lambda code is uploaded
-  LambdaCodeKey:
-    Type: String
-    Default: "lambda.zip"
-    Description: S3 key for the Lambda code zip file
 
   ProjectName:
     Type: String
@@ -183,9 +175,7 @@ Resources:
       FunctionName: !Sub "${ProjectName}-api-handler"
       Handler: index.handler
       Runtime: nodejs20.x
-      CodeUri:
-        Bucket: !Ref LambdaCodeBucket
-        Key: !Ref LambdaCodeKey
+      CodeUri: ./lambda
       MemorySize: 512
       Timeout: 30
       Policies:

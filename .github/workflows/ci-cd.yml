@@ -127,18 +127,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Prepare Lambda and S3
-        run: |
-          # Create zip
-          cd lambda && zip -r ../lambda.zip . && cd ..
-          # Ensure bucket exists
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          # We use a specific bucket name for code
-          CODE_BUCKET="platemate-code-${ACCOUNT_ID}"
-          aws s3 mb s3://$CODE_BUCKET || true
-          # Upload code
-          aws s3 cp lambda.zip s3://$CODE_BUCKET/lambda.zip
-
       - name: Set Environment Variables
         id: set_env
         run: |
@@ -151,15 +139,12 @@ jobs:
       - name: Deploy Backend (AWS SAM)
         id: sam_deploy
         run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          CODE_BUCKET="platemate-code-${ACCOUNT_ID}"
-          
           sam build
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
             --stack-name ${{ steps.set_env.outputs.stack_name }} \
             --capabilities CAPABILITY_IAM \
             --resolve-s3 \
-            --parameter-overrides "GoogleApiKey=${{ secrets.GOOGLE_API_KEY }},UseMockData=false,LambdaCodeBucket=${CODE_BUCKET},LambdaCodeKey=lambda.zip"
+            --parameter-overrides GoogleApiKey=${{ secrets.GOOGLE_API_KEY }},UseMockData=false
           
           # Extract outputs
           API_URL=$(aws cloudformation describe-stacks --stack-name ${{ steps.set_env.outputs.stack_name }} --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)
