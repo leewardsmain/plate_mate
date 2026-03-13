@@ -87,7 +87,7 @@
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     overflow: hidden;
-    z-index: 100;
+    z-index: 9999;
 }
 
 .resultItem {

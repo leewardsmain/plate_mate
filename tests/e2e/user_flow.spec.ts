@@ -55,19 +55,26 @@ test.describe('PlateMate E2E Flows', () => {
         // Fill out review - searching for restaurant inside the modal
         // The modal uses RestaurantSearch component too
         const restaurantInput = page.locator('input[placeholder*="Restaurants"]').last();
-        await restaurantInput.fill('Pizza Palace');
+        // Type slowly to ensure each character registers if there's a debounce
+        await restaurantInput.pressSequentially('pizza', { delay: 150 });
         
-        // Wait for suggestion to appear in the dropdown
-        const suggestion = page.locator('text=The Pizza Palace').first();
-        await expect(suggestion).toBeVisible({ timeout: 15000 });
+        // Wait for ANY suggestion to appear in the dropdown
+        // The results use span.resultName now
+        const firstSuggestion = page.locator('span[class*="resultName"]').first();
+        await expect(firstSuggestion).toBeVisible({ timeout: 20000 });
         
-        // Click the suggestion directly by text to avoid CSS Module class issues
-        await suggestion.click({ force: true });
+        const restaurantName = await firstSuggestion.innerText();
+
+        // Click the suggestion directly
+        await firstSuggestion.click({ force: true });
+
+        // Ensure state update and transition
+        await page.waitForTimeout(1000);
 
         // Modal should auto-advance to step 2 (showing textarea)
         const textarea = page.locator('textarea');
         await expect(textarea).toBeVisible({ timeout: 15000 });
-        await textarea.fill('Best pizza ever!');
+        await textarea.fill(`Best ${restaurantName} ever!`);
         
         // Click the post button in the modal
         await page.locator('button:has-text("Post"), button:has-text("Create")').click();

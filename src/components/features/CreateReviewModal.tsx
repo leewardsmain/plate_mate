@@ -4,6 +4,7 @@ import styles from './CreateReviewModal.module.css';
 
 import { useAppStore } from '../../store/useAppStore';
 import { api } from '../../services/api';
+import { RestaurantSearch } from './RestaurantSearch';
 
 interface DishReview {
     id: string;
@@ -19,8 +20,6 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
         isCreateReviewModalOpen,
         closeCreateReviewModal,
         addReview,
-        searchResults,
-        searchRestaurants,
         currentRestaurant,
         currentUser
     } = useAppStore();
@@ -28,7 +27,6 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
     const [step, setStep] = useState<1 | 2>(1);
     const [selectedVenue, setSelectedVenue] = useState<string | null>(initialRestaurantId || null);
     const [selectedVenueDetails, setSelectedVenueDetails] = useState<any | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
     const [reviewText, setReviewText] = useState('');
     const [dishes, setDishes] = useState<DishReview[]>([
         { id: Date.now().toString(), name: '', rating: 5.0, sentiment: 'none', img: '' }
@@ -39,22 +37,11 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
         if (initialRestaurantId && currentRestaurant && currentRestaurant.place_id === initialRestaurantId) {
             setSelectedVenue(initialRestaurantId);
             setSelectedVenueDetails(currentRestaurant);
-            setSearchQuery(currentRestaurant.name);
             setStep(2);
         } else if (isCreateReviewModalOpen && !initialRestaurantId) {
             setStep(1);
         }
     }, [initialRestaurantId, currentRestaurant, isCreateReviewModalOpen]);
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            if (searchQuery.length > 2) {
-                searchRestaurants(searchQuery);
-            }
-        }, 500);
-        return () => clearTimeout(timeoutId);
-    }, [searchQuery, searchRestaurants]);
-
 
     useEffect(() => {
         if (isCreateReviewModalOpen) { document.body.style.overflow = 'hidden'; }
@@ -91,7 +78,6 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
                 setSelectedVenue(null);
                 setReviewText('');
                 setDishes([{ id: Date.now().toString(), name: '', rating: 5.0, sentiment: 'none', img: '' }]);
-                setSearchQuery('');
             }, 300);
         }
     };
@@ -173,55 +159,16 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
                             <h1 className={styles.stepTitle}>Where did you eat?</h1>
                             <p className={styles.stepSubtitle}>Find the spot to start your review.</p>
 
-                            <div className={styles.searchInputWrapper}>
-                                <span className={`material-symbols-outlined ${styles.searchIcon}`}>search</span>
-                                <input
-                                    type="text"
-                                    className={styles.searchInput}
-                                    placeholder="Search for a restaurant..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
+                            <RestaurantSearch onSelect={(result) => {
+                                setSelectedVenue(result.place_id);
+                                setSelectedVenueDetails(result);
+                                setStep(2);
+                            }} />
 
-                            <div>
-                                <p className={styles.suggestionsLabel}>
-                                    {searchQuery ? `Results for "${searchQuery}"` : 'Top Suggestions'}
-                                </p>
-                                {searchResults.length > 0 && searchQuery.length > 2 ? (
-                                    searchResults.map(v => (
-                                        <div
-                                            key={v.place_id}
-                                            className={`${styles.venueItem} ${selectedVenue === v.place_id ? styles.selected : ''}`}
-                                            onClick={() => {
-                                                setSelectedVenue(v.place_id);
-                                                setSelectedVenueDetails(v);
-                                                // Auto-advance to step 2
-                                                setStep(2);
-                                            }}
-                                        >
-                                            <div className={styles.venueImage} style={{
-                                                backgroundImage: `url(${v.photos && v.photos.length > 0
-                                                    ? api.getRestaurantPhotoUrl(v.photos[0].photo_reference)
-                                                    : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80'
-                                                    })`
-                                            }} />
-                                            <div className={styles.venueInfo}>
-                                                <h3 className={styles.venueName}>{v.name}</h3>
-                                                <p className={styles.venueLocation}>
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>location_on</span>
-                                                    {v.formatted_address}
-                                                </p>
-                                            </div>
-                                            <div className={styles.venueCheck}>
-                                                <span className={`material-symbols-outlined ${styles.checkIcon}`}>check</span>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : selectedVenueDetails ? (
-                                    <div
-                                        className={`${styles.venueItem} ${styles.selected}`}
-                                    >
+                            {selectedVenueDetails && (
+                                <div style={{ marginTop: '1.5rem' }}>
+                                    <p className={styles.suggestionsLabel}>Selected Restaurant</p>
+                                    <div className={`${styles.venueItem} ${styles.selected}`}>
                                         <div className={styles.venueImage} style={{
                                             backgroundImage: `url(${selectedVenueDetails.photos && selectedVenueDetails.photos.length > 0
                                                 ? api.getRestaurantPhotoUrl(selectedVenueDetails.photos[0].photo_reference)
@@ -239,14 +186,8 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
                                             <span className={`material-symbols-outlined ${styles.checkIcon}`}>check</span>
                                         </div>
                                     </div>
-                                ) : (
-                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--slate-500)' }}>
-                                        <span className="material-symbols-outlined" style={{ fontSize: '3rem', marginBottom: '1rem' }}>search_off</span>
-                                        <p>{searchQuery.length <= 2 ? 'Search for a restaurant' : `No restaurants found matching "${searchQuery}"`}</p>
-                                    </div>
-                                )}
-                            </div>
-
+                                </div>
+                            )}
                         </div>
                     )}
 

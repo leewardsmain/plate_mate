@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import styles from './RestaurantSearch.module.css';
 
-export const RestaurantSearch: React.FC = () => {
+interface RestaurantSearchProps {
+    onSelect?: (result: any) => void;
+}
+
+export const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ onSelect }) => {
     const [query, setQuery] = useState('');
     const [location, setLocation] = useState('');
     const [isOpen, setIsOpen] = useState(false);
@@ -22,16 +26,6 @@ export const RestaurantSearch: React.FC = () => {
         }, 500);
         return () => clearTimeout(timer);
     }, [query, location, searchRestaurants]);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     const handleUseLocation = () => {
         if ("geolocation" in navigator) {
@@ -54,10 +48,15 @@ export const RestaurantSearch: React.FC = () => {
         }
     };
 
-    const handleSelect = (placeId: string) => {
+    const handleSelect = (result: any) => {
         setIsOpen(false);
         setQuery('');
-        navigate(`/restaurant/${placeId}`);
+        
+        if (onSelect) {
+            onSelect(result);
+        } else {
+            navigate(`/restaurant/${result.place_id}`);
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -106,7 +105,7 @@ export const RestaurantSearch: React.FC = () => {
                                 <div
                                     key={result.place_id}
                                     className={styles.resultItem}
-                                    onClick={() => handleSelect(result.place_id)}
+                                    onClick={() => handleSelect(result)}
                                 >
                                     <div className={styles.resultInfo}>
                                         <span className={styles.resultName}>{result.name}</span>
