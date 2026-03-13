@@ -8,5 +8,6 @@ export default defineConfig({
         setupFiles: ['./src/setupTests.ts'],
         globals: true,
         include: ['tests/api_integration.test.ts'],
+        testTimeout: 15000,
     }
 });

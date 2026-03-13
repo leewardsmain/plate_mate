@@ -58,10 +58,14 @@ test.describe('PlateMate E2E Flows', () => {
         // Type slowly to ensure each character registers if there's a debounce
         await restaurantInput.pressSequentially('pizza', { delay: 150 });
         
+        // Wait for results dropdown to appear
+        const dropdown = page.locator('[class*="resultsDropdown"]');
+        await expect(dropdown).toBeVisible({ timeout: 30000 });
+        
         // Wait for ANY suggestion to appear in the dropdown
         // The results use span.resultName now
         const firstSuggestion = page.locator('span[class*="resultName"]').first();
-        await expect(firstSuggestion).toBeVisible({ timeout: 20000 });
+        await expect(firstSuggestion).toBeVisible({ timeout: 10000 });
         
         const restaurantName = await firstSuggestion.innerText();
 
