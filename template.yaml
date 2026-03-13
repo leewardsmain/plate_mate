@@ -114,7 +114,7 @@ Resources:
             Principal:
               Service: cloudfront.amazonaws.com
             Action: s3:GetObject
-            Resource: !Sub "${FrontendBucket.Arn}/*"
+            Resource: !Sub "arn:aws:s3:::${FrontendBucket}/*"
 
   # 3. DynamoDB Tables
   UsersTable:
