@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CreateReviewModal } from '../../components/features/CreateReviewModal';
 import { useAppStore } from '../../store/useAppStore';
 import { vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock useAppStore
 vi.mock('../../store/useAppStore', () => ({
@@ -43,10 +44,14 @@ describe('CreateReviewModal text review field', () => {
     });
 
     it('allows entering a text review and submits it with addReview', async () => {
-        render(<CreateReviewModal />);
+        render(
+            <MemoryRouter>
+                <CreateReviewModal />
+            </MemoryRouter>
+        );
 
         // Step 1: Search and select venue
-        const searchInput = screen.getByPlaceholderText('Search for a restaurant...');
+        const searchInput = screen.getByPlaceholderText('Restaurants...');
         fireEvent.change(searchInput, { target: { value: 'Test' } });
 
         await waitFor(() => {

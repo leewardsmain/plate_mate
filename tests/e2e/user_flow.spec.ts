@@ -77,7 +77,7 @@ test.describe('PlateMate E2E Flows', () => {
         await textarea.fill(`Best ${restaurantName} ever!`);
         
         // Click the post button in the modal
-        await page.locator('button:has-text("Post"), button:has-text("Create")').click();
+        await page.locator('button:has-text("Submit Review")').click();
 
         // Wait for modal to close or toast
         await page.waitForTimeout(2000);
