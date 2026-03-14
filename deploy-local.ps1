@@ -19,11 +19,12 @@ aws s3 mb s3://$CODE_BUCKET --endpoint-url $ENDPOINT 2>$null
 
 # Wait for bucket to be ready
 $retry = 0
-while ($retry -lt 5) {
-    if (aws s3 ls s3://$CODE_BUCKET --endpoint-url $ENDPOINT 2>$null) {
+while ($retry -lt 10) {
+    if (aws s3api head-bucket --bucket $CODE_BUCKET --endpoint-url $ENDPOINT 2>$null) {
+        Write-Host "Bucket $CODE_BUCKET is ready." -ForegroundColor Green
         break
     }
-    Write-Host "Waiting for bucket $CODE_BUCKET..." -ForegroundColor Gray
+    Write-Host "Waiting for bucket $CODE_BUCKET (retry $($retry+1))..." -ForegroundColor Gray
     Start-Sleep -Seconds 2
     $retry++
 }
