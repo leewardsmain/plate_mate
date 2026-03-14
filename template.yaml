@@ -69,6 +69,7 @@ Resources:
     Properties:
       OriginAccessControlConfig:
         Description: "OAC for PlateMate Frontend"
+        Name: !Sub "${AWS::StackName}-OAC"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -98,6 +99,7 @@ Resources:
 
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
+    DependsOn: FrontendBucket
     Properties:
       Bucket: !Ref FrontendBucket
       PolicyDocument:
