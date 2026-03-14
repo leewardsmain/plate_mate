@@ -68,16 +68,24 @@ exports.handler = async (event) => {
     } = require("@aws-sdk/lib-dynamodb");
     const { PutObjectCommand } = require("@aws-sdk/client-s3");
 
-    let { httpMethod, path, pathParameters, body: bodyStr } = event;
+    let { httpMethod, path = "/", pathParameters, body: bodyStr } = event;
     const body = bodyStr ? JSON.parse(bodyStr) : {};
 
     // Robust path normalization for LocalStack/APIGateway
     if (pathParameters && pathParameters.proxy) {
         path = '/' + pathParameters.proxy;
     } else {
-        path = path.replace(/^\/(?:dev|prod|stage)\//i, '/');
-        path = path.replace(/^\/_user_request_\//i, '/');
-        path = path.replace(/^\/(?:dev|prod|stage)\/_user_request_\//i, '/');
+        // Step-by-step normalization to handle stage prefixes and LocalStack markers
+        let segments = path.split('/').filter(Boolean);
+        
+        // Repeatedly remove segments if they match stage or LocalStack patterns
+        // This handles cases like /Prod/_user_request_/reviews
+        while (segments.length > 0 && 
+               (['Prod', 'dev', 'stage', '_user_request_'].includes(segments[0]))) {
+            segments.shift();
+        }
+        
+        path = '/' + segments.join('/');
     }
 
     if (path.length > 1 && path.endsWith('/')) {
@@ -306,17 +314,24 @@ exports.handler = async (event) => {
 
             if (!query) return { statusCode: 400, headers, body: JSON.stringify({ error: "Query required" }) };
             
-            // If no API key, go straight to mock data if enabled
-            if (!GOOGLE_API_KEY || GOOGLE_API_KEY === "") {
+            // Critical fix: If no API key is provided, we MUST return mock data immediately if enabled
+            // This prevents the fetch() call below from failing or returning 401/403 which can crash some environments
+            if (!GOOGLE_API_KEY || GOOGLE_API_KEY.trim() === "") {
                 if (process.env.USE_MOCK_DATA === "true") {
+                    console.log("SEARCH: No API key, returning MOCK data");
                     const mockResults = [
                         { place_id: "mock_1", name: "The Pizza Palace", formatted_address: "123 Cheese St, San Francisco, CA", rating: 4.5, price_level: 2, opening_hours: { open_now: true } },
                         { place_id: "mock_2", name: "Burger Haven", formatted_address: "456 Patty Ln, San Francisco, CA", rating: 4.2, price_level: 1, opening_hours: { open_now: false } },
                         { place_id: "mock_3", name: "Sushi Zen", formatted_address: "789 Maki Rd, San Francisco, CA", rating: 4.8, price_level: 3, opening_hours: { open_now: true } }
                     ];
-                    return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
+                    return { 
+                        statusCode: 200, 
+                        headers, 
+                        body: JSON.stringify(mockResults),
+                        _debug: { source: 'mock', reason: 'missing_key' }
+                    };
                 }
-                return { statusCode: 401, headers, body: JSON.stringify({ error: "API Key missing" }) };
+                return { statusCode: 401, headers, body: JSON.stringify({ error: "Google API Key is missing and mock data is disabled" }) };
             }
 
             if (location) query = `${query} in ${location}`;
