@@ -1,8 +1,9 @@
 $ENDPOINT = "http://localhost:4566"
+$CODE_BUCKET = "platemate-code-local"
 
 Write-Host "--- Packaging Lambda ---" -ForegroundColor Cyan
 if (Test-Path "lambda.zip") { Remove-Item "lambda.zip" }
-Compress-Archive -Path "lambda/index.js" -DestinationPath "lambda.zip"
+Compress-Archive -Path "lambda/*" -DestinationPath "lambda.zip"
 
 Write-Host "--- Checking LocalStack Status ---" -ForegroundColor Cyan
 try {
@@ -14,17 +15,28 @@ catch {
 }
 
 Write-Host "--- Preparing S3 Bucket for Code ---" -ForegroundColor Cyan
-aws s3 mb s3://platemate-frontend-app --endpoint-url $ENDPOINT 2>$null
+aws s3 mb s3://$CODE_BUCKET --endpoint-url $ENDPOINT 2>$null
+
+# Wait for bucket to be ready
+$retry = 0
+while ($retry -lt 5) {
+    if (aws s3 ls s3://$CODE_BUCKET --endpoint-url $ENDPOINT 2>$null) {
+        break
+    }
+    Write-Host "Waiting for bucket $CODE_BUCKET..." -ForegroundColor Gray
+    Start-Sleep -Seconds 2
+    $retry++
+}
 
 # Apply CORS to bucket
 New-Item -Path "cors.json" -ItemType "file" -Value '{"CORSRules":[{"AllowedHeaders":["*"],"AllowedMethods":["PUT","GET","POST"],"AllowedOrigins":["*"],"ExposeHeaders":[]}]}' -Force | Out-Null
-aws s3api put-bucket-cors --bucket platemate-frontend-app --cors-configuration file://cors.json --endpoint-url $ENDPOINT
+aws s3api put-bucket-cors --bucket $CODE_BUCKET --cors-configuration file://cors.json --endpoint-url $ENDPOINT
 
 # 1. Package the template (handles zipping ./lambda and uploading to S3)
 Write-Host "--- Packaging Template ---" -ForegroundColor Cyan
 aws cloudformation package `
     --template-file template.yaml `
-    --s3-bucket platemate-frontend-app `
+    --s3-bucket $CODE_BUCKET `
     --output-template-file packaged.yaml `
     --endpoint-url $ENDPOINT
 

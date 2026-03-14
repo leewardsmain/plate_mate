@@ -25,7 +25,6 @@ Resources:
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${ProjectName}-frontend-${AWS::AccountId}"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
@@ -40,7 +39,6 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub "${ProjectName}-user-pool"
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: false
       AutoVerifiedAttributes:
@@ -58,7 +56,6 @@ Resources:
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Sub "${ProjectName}-frontend-client"
       UserPoolId: !Ref UserPool
       ExplicitAuthFlows:
         - ALLOW_USER_PASSWORD_AUTH
@@ -72,7 +69,6 @@ Resources:
     Properties:
       OriginAccessControlConfig:
         Description: "OAC for PlateMate Frontend"
-        Name: !Sub "${ProjectName}-frontend-oac-${AWS::AccountId}"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -105,7 +101,6 @@ Resources:
 
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
-    DependsOn: FrontendBucket
     Properties:
       Bucket: !Ref FrontendBucket
       PolicyDocument:
@@ -115,13 +110,12 @@ Resources:
             Principal:
               Service: cloudfront.amazonaws.com
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${FrontendBucket}/*"
+            Resource: !Sub "${FrontendBucket.Arn}/*"
 
   # 3. DynamoDB Tables
   UsersTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub "${ProjectName}-users"
       AttributeDefinitions:
         - AttributeName: userId
           AttributeType: S
@@ -133,7 +127,6 @@ Resources:
   ReviewsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub "${ProjectName}-reviews"
       AttributeDefinitions:
         - AttributeName: reviewId
           AttributeType: S
@@ -154,7 +147,6 @@ Resources:
   RestaurantsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub "${ProjectName}-restaurants"
       AttributeDefinitions:
         - AttributeName: placeId
           AttributeType: S
@@ -167,7 +159,6 @@ Resources:
   ApiLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "${ProjectName}-api-handler"
       Handler: index.handler
       Runtime: nodejs20.x
       CodeUri: ./lambda
