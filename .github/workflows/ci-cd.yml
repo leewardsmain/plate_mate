@@ -38,6 +38,8 @@ jobs:
           npx wait-on http://localhost:4566/_localstack/health
 
       - name: Deploy to LocalStack
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
           # Install awslocal
           pip install awscli-local
@@ -56,7 +58,7 @@ jobs:
           
           # Create Lambda Function
           cd lambda && npm install && zip -r ../lambda.zip . && cd ..
-          awslocal lambda create-function --function-name platemate-api-handler --runtime nodejs20.x --handler index.handler --role arn:aws:iam::000000000000:role/lambda-role --zip-file fileb://lambda.zip --environment "Variables={REVIEWS_TABLE=platemate-reviews,USERS_TABLE=platemate-users,RESTAURANTS_TABLE=platemate-restaurants,AVATAR_BUCKET=platemate-assets,USE_MOCK_DATA=true,IS_LOCALSTACK=true,LOCALSTACK_HOSTNAME=localstack}"
+          awslocal lambda create-function --function-name platemate-api-handler --runtime nodejs20.x --handler index.handler --role arn:aws:iam::000000000000:role/lambda-role --zip-file fileb://lambda.zip --environment "Variables={REVIEWS_TABLE=platemate-reviews,USERS_TABLE=platemate-users,RESTAURANTS_TABLE=platemate-restaurants,AVATAR_BUCKET=platemate-assets,USE_MOCK_DATA=true,IS_LOCALSTACK=true,LOCALSTACK_HOSTNAME=localstack,GOOGLE_API_KEY=$GOOGLE_API_KEY}"
           
           # Setup API Gateway
           API_ID=$(awslocal apigateway create-rest-api --name 'PlateMate API' --query 'id' --output text)

@@ -305,6 +305,20 @@ exports.handler = async (event) => {
             const location = event.queryStringParameters?.location;
 
             if (!query) return { statusCode: 400, headers, body: JSON.stringify({ error: "Query required" }) };
+            
+            // If no API key, go straight to mock data if enabled
+            if (!GOOGLE_API_KEY || GOOGLE_API_KEY === "") {
+                if (process.env.USE_MOCK_DATA === "true") {
+                    const mockResults = [
+                        { place_id: "mock_1", name: "The Pizza Palace", formatted_address: "123 Cheese St, San Francisco, CA", rating: 4.5, price_level: 2, opening_hours: { open_now: true } },
+                        { place_id: "mock_2", name: "Burger Haven", formatted_address: "456 Patty Ln, San Francisco, CA", rating: 4.2, price_level: 1, opening_hours: { open_now: false } },
+                        { place_id: "mock_3", name: "Sushi Zen", formatted_address: "789 Maki Rd, San Francisco, CA", rating: 4.8, price_level: 3, opening_hours: { open_now: true } }
+                    ];
+                    return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
+                }
+                return { statusCode: 401, headers, body: JSON.stringify({ error: "API Key missing" }) };
+            }
+
             if (location) query = `${query} in ${location}`;
 
             console.log(`SEARCH: Attempting Google API search for "${query}"`);
