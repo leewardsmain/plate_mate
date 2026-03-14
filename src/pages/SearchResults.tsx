@@ -31,7 +31,7 @@ export default function SearchResults() {
             </header>
 
             <div className={styles.resultsGrid}>
-                {searchResults.map((result: any) => (
+                {Array.isArray(searchResults) && searchResults.map((result: any) => (
                     <div
                         key={result.place_id}
                         className={styles.resultCard}

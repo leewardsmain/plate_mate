@@ -42,11 +42,24 @@ const apiRequest = async (path: string, options: RequestInit = {}) => {
     });
 
     if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `HTTP error! status: ${response.status}`);
+        const contentType = response.headers?.get('content-type');
+        let errorData;
+        if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        } else {
+            errorData = { error: `HTTP error! status: ${response.status}` };
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
 
     if (response.status === 204) return null;
+
+    const contentType = response.headers?.get('content-type');
+    if (contentType && !contentType.includes('application/json')) {
+        console.warn(`Expected JSON but received ${contentType} from ${path}`);
+        return null; // Or throw an error, but null is safer for mapping if we handle it
+    }
+
     return response.json();
 };
 

@@ -100,7 +100,7 @@ export const RestaurantSearch: React.FC<RestaurantSearchProps> = ({ onSelect }) 
             {isOpen && (
                 <div className={styles.resultsDropdown}>
                     <div className={styles.resultsList}>
-                        {searchResults.length > 0 ? (
+                        {Array.isArray(searchResults) && searchResults.length > 0 ? (
                             searchResults.slice(0, 5).map((result: any) => (
                                 <div
                                     key={result.place_id}

@@ -38,7 +38,7 @@ export default function Profile() {
             img: img || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80',
             circleReviewCount: circleReviewsForRest.length,
             latestReviewTime: myReviewsForRest[0]?.time || 'Saved',
-            dishes: myReviewsForRest.flatMap(r => r.dishes.map(d => ({ ...d, reviewId: r.id }))),
+            dishes: myReviewsForRest.flatMap(r => (Array.isArray(r.dishes) ? r.dishes : []).map(d => ({ ...d, reviewId: r.id }))),
             isVisited: true,
         };
     });
@@ -274,39 +274,41 @@ export default function Profile() {
                             sortedReviews.length > 0 ? (
                                 sortedReviews.map(rev => (
                                     <article key={rev.id} className={`${styles.revCard} glass-card`}>
-                                        <div className={styles.revImg} style={{ backgroundImage: `url('${rev.img}')` }}>
-                                            <div className={styles.revScore}>
-                                                <span className={`material-symbols-outlined ${styles.revScoreIcon}`} style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                {rev.rating ? rev.rating.toFixed(1) : '5.0'}
+                                        {rev.img && (
+                                            <div className={styles.revImg} style={{ backgroundImage: `url('${rev.img}')` }}>
+                                                <div className={styles.revScore}>
+                                                    <span className={`material-symbols-outlined ${styles.revScoreIcon}`} style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                                    {rev.rating ? rev.rating.toFixed(1) : '5.0'}
+                                                </div>
+                                                {/* More options button overlay */}
+                                                <div className={styles.revMoreWrapper}>
+                                                    <button
+                                                        className={styles.revMoreBtn}
+                                                        onClick={(e) => handleMoreClick(e, rev.id)}
+                                                    >
+                                                        <span className="material-symbols-outlined">more_horiz</span>
+                                                    </button>
+                                                    {openMenuId === rev.id && (
+                                                        <div className={styles.revContextMenu}>
+                                                            <button
+                                                                className={styles.revContextItem}
+                                                                onClick={() => { openEditModal(rev.eventId, rev.id); setOpenMenuId(null); }}
+                                                            >
+                                                                <span className="material-symbols-outlined">edit</span>
+                                                                Edit Review
+                                                            </button>
+                                                            <button
+                                                                className={`${styles.revContextItem} ${styles.revContextItemDanger}`}
+                                                                onClick={() => { deleteReview(rev.eventId); setOpenMenuId(null); }}
+                                                            >
+                                                                <span className="material-symbols-outlined">delete</span>
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            {/* More options button overlay */}
-                                            <div className={styles.revMoreWrapper}>
-                                                <button
-                                                    className={styles.revMoreBtn}
-                                                    onClick={(e) => handleMoreClick(e, rev.id)}
-                                                >
-                                                    <span className="material-symbols-outlined">more_horiz</span>
-                                                </button>
-                                                {openMenuId === rev.id && (
-                                                    <div className={styles.revContextMenu}>
-                                                        <button
-                                                            className={styles.revContextItem}
-                                                            onClick={() => { openEditModal(rev.eventId, rev.id); setOpenMenuId(null); }}
-                                                        >
-                                                            <span className="material-symbols-outlined">edit</span>
-                                                            Edit Review
-                                                        </button>
-                                                        <button
-                                                            className={`${styles.revContextItem} ${styles.revContextItemDanger}`}
-                                                            onClick={() => { deleteReview(rev.eventId); setOpenMenuId(null); }}
-                                                        >
-                                                            <span className="material-symbols-outlined">delete</span>
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
+                                        )}
                                         <div className={styles.revContent}>
                                             <div className={styles.revTitleRow}>
                                                 <div>

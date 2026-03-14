@@ -125,9 +125,9 @@ const INITIAL_REVIEWS: DiningEvent[] = [
         likes: 0,
         comments: 0,
         dishes: [
-            { id: 'd1', name: 'Miso Black Cod', price: '$38', rating: 5.0, sentiment: 'love', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&q=80' },
-            { id: 'd2', name: 'Spicy Tuna Crispy Rice', price: '$24', rating: 4.8, sentiment: 'love', img: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&q=80' },
-            { id: 'd3', name: 'Shishito Peppers', price: '$14', rating: 2.5, sentiment: 'leave', img: 'https://images.unsplash.com/photo-1550966871-3ed3c6227b42?w=400&q=80' },
+            { id: 'd1', name: 'Miso Black Cod', price: '$38', rating: 5.0, sentiment: 'love', img: '' },
+            { id: 'd2', name: 'Spicy Tuna Crispy Rice', price: '$24', rating: 4.8, sentiment: 'love', img: '' },
+            { id: 'd3', name: 'Shishito Peppers', price: '$14', rating: 2.5, sentiment: 'leave', img: '' },
         ],
         likedBy: [],
         commentsList: []
@@ -144,8 +144,8 @@ const INITIAL_REVIEWS: DiningEvent[] = [
         likes: 0,
         comments: 0,
         dishes: [
-            { id: 'd4', name: 'Sheep\'s Milk Cheese Agnolotti', price: '$26', rating: 4.5, sentiment: 'love', img: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=80' },
-            { id: 'd5', name: 'Chocolate Gelato', price: '$16', rating: 4.0, sentiment: 'love', img: 'https://images.unsplash.com/photo-1563805042-7684c8a9e1cb?w=400&q=80' },
+            { id: 'd4', name: 'Sheep\'s Milk Cheese Agnolotti', price: '$26', rating: 4.5, sentiment: 'love', img: '' },
+            { id: 'd5', name: 'Chocolate Gelato', price: '$16', rating: 4.0, sentiment: 'love', img: '' },
         ],
         likedBy: [],
         commentsList: []
@@ -162,7 +162,7 @@ const INITIAL_REVIEWS: DiningEvent[] = [
         likes: 5,
         comments: 2,
         dishes: [
-            { id: 'd_alex_1', name: 'Sheep\'s Milk Cheese Agnolotti', price: '$26', rating: 5.0, sentiment: 'love', img: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=80' }
+            { id: 'd_alex_1', name: 'Sheep\'s Milk Cheese Agnolotti', price: '$26', rating: 5.0, sentiment: 'love', img: '' }
         ],
         likedBy: ['user_2'],
         commentsList: [
@@ -474,7 +474,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     searchRestaurants: async (query, location) => {
         try {
             const results = await api.searchRestaurants(query, location);
-            set({ searchResults: results });
+            // Ensure results is an array before setting state
+            set({ searchResults: Array.isArray(results) ? results : [] });
         } catch (error) {
             console.error("Search restaurants failed:", error);
             set({ searchResults: [] });

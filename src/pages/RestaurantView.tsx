@@ -240,7 +240,7 @@ export default function RestaurantView() {
                                         }}
                                         style={{ cursor: item.reviewer === currentUser.name ? 'pointer' : 'default' }}
                                     >
-                                        <div className={styles.ledgerImg} style={{ backgroundImage: `url('${item.img}')` }} />
+                                        {item.img && <div className={styles.ledgerImg} style={{ backgroundImage: `url('${item.img}')` }} />}
                                         <div className={styles.ledgerContent}>
                                             <div>
                                                 <div className={styles.ledgerTop}>

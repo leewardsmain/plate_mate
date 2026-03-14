@@ -341,22 +341,16 @@ exports.handler = async (event) => {
                 
                 // If Google returned an error status (like REQUEST_DENIED), fallback to mock if enabled
                 if (process.env.USE_MOCK_DATA === "true") {
-                    return { 
-                        statusCode: 200, 
-                        headers, 
-                        body: JSON.stringify({
-                            results: mockResults,
-                            _error: `Google status: ${data.status}`,
-                            _info: "Mock data returned because Google API denied the request. Check if the key has Places API enabled."
-                        })
-                    };
+                    console.log(`SEARCH: Google denied (${data.status}), returning MOCK data`);
+                    // We return the ARRAY directly to satisfy the frontend's expectations
+                    return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
                 }
                 return { statusCode: 502, headers, body: JSON.stringify({ error: `Google API error: ${data.status}` }) };
 
             } catch (err) {
                 console.error("SEARCH: Google API fetch failed:", err);
                 if (process.env.USE_MOCK_DATA === "true") {
-                    return { statusCode: 200, headers, body: JSON.stringify(mockResults), _debug: { error: err.message } };
+                    return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
                 }
                 return { statusCode: 502, headers, body: JSON.stringify({ error: "Failed to reach Google API" }) };
             }

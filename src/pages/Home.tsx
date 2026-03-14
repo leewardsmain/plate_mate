@@ -103,13 +103,15 @@ export default function Home() {
                                 {review.text && <p className={styles.rcText}>{review.text}</p>}
 
                                 <div className={`${styles.dishCarousel} hide-scrollbar`}>
-                                    {review.dishes.map(dish => (
+                                    {Array.isArray(review.dishes) && review.dishes.map(dish => (
                                         <div key={dish.id} className={styles.dishCard}>
-                                            <div className={styles.dcImage} style={{ backgroundImage: `url('${dish.img}')` }}>
-                                                <div className={styles.dcPrice}>
-                                                    <span className={styles.dcPriceTag}>{dish.price}</span>
+                                            {dish.img && (
+                                                <div className={styles.dcImage} style={{ backgroundImage: `url('${dish.img}')` }}>
+                                                    <div className={styles.dcPrice}>
+                                                        <span className={styles.dcPriceTag}>{dish.price}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
                                             <div className={styles.dcInfo}>
                                                 <h4 className={styles.dcName}>{dish.name}</h4>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
