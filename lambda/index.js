@@ -307,28 +307,43 @@ exports.handler = async (event) => {
             if (!query) return { statusCode: 400, headers, body: JSON.stringify({ error: "Query required" }) };
             if (location) query = `${query} in ${location}`;
 
+            console.log(`SEARCH: Attempting Google API search for "${query}"`);
+            console.log(`SEARCH: USE_MOCK_DATA=${process.env.USE_MOCK_DATA}`);
+            
             const googleUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${GOOGLE_API_KEY}`;
             
             let data = { status: 'UNKNOWN', results: [] };
             try {
                 const response = await fetch(googleUrl);
                 data = await response.json();
+                console.log(`SEARCH: Google status=${data.status}, results=${data.results?.length}`);
             } catch (err) {
-                console.error("Fetch to Google failed:", err);
+                console.error("SEARCH: Fetch to Google failed:", err);
             }
 
             const results = data.results || [];
 
             if ((results.length === 0 || data.status !== 'OK') && process.env.USE_MOCK_DATA === "true") {
+                console.log("SEARCH: Returning MOCK data");
                 const mockResults = [
                     { place_id: "mock_1", name: "The Pizza Palace", formatted_address: "123 Cheese St, San Francisco, CA", rating: 4.5, price_level: 2, opening_hours: { open_now: true } },
                     { place_id: "mock_2", name: "Burger Haven", formatted_address: "456 Patty Ln, San Francisco, CA", rating: 4.2, price_level: 1, opening_hours: { open_now: false } },
                     { place_id: "mock_3", name: "Sushi Zen", formatted_address: "789 Maki Rd, San Francisco, CA", rating: 4.8, price_level: 3, opening_hours: { open_now: true } }
                 ];
-                return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
+                return { 
+                    statusCode: 200, 
+                    headers, 
+                    body: JSON.stringify(mockResults),
+                    _debug: { source: 'mock', googleStatus: data.status }
+                };
             }
 
-            return { statusCode: 200, headers, body: JSON.stringify(results) };
+            return { 
+                statusCode: 200, 
+                headers, 
+                body: JSON.stringify(results),
+                _debug: { source: 'google', googleStatus: data.status, count: results.length }
+            };
         }
 
         else if (httpMethod === 'GET' && path.includes('/photo/')) {
