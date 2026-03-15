@@ -85,6 +85,8 @@
     border-radius: 1rem;
     overflow: hidden;
     box-shadow: var(--card-shadow);
+    width: 100%;
+    min-width: 0;
 }
 
 .rcHeader {
@@ -93,6 +95,7 @@
     align-items: flex-start;
     justify-content: space-between;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    min-width: 0;
 }
 
 @media (min-width: 640px) {
@@ -104,6 +107,7 @@
 .rcAuthorInfo {
     display: flex;
     gap: 0.75rem;
+    min-width: 0;
 }
 
 @media (min-width: 640px) {
@@ -164,6 +168,8 @@
     align-items: center;
     gap: 0.25rem;
     margin-top: 0.25rem;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .rcBody {

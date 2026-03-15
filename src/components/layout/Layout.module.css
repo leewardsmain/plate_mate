@@ -14,8 +14,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 1rem;
-    max-width: 100vw;
-    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
     background: var(--glass-surface);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);

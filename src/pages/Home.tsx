@@ -54,8 +54,8 @@ export default function Home() {
                             <div className={styles.rcHeader}>
                                 <div className={styles.rcAuthorInfo}>
                                     <div className={styles.rcAuthorAvatar} style={{ backgroundImage: `url('${review.avatar}')` }} />
-                                    <div>
-                                        <p style={{ color: 'var(--slate-200)' }}>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <p style={{ color: 'var(--slate-200)', wordBreak: 'break-word' }}>
                                             <span className={styles.rcAuthorName}>{displayAuthor}</span> dined at{' '}
                                             <Link to={`/restaurant/${review.restaurantId}`} className={styles.rcRestaurant}>{review.restaurantName}</Link>
                                         </p>
