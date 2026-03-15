@@ -63,7 +63,7 @@ export default function Layout() {
                     <button className={`${styles.iconButton} ${styles.hideMobile}`}>
                         <span className="material-symbols-outlined">chat_bubble</span>
                     </button>
-                    <button className={styles.primaryButton} onClick={() => openCreateReviewModal()} aria-label="Log Meal">
+                    <button className={`${styles.primaryButton} ${styles.hideMobile}`} onClick={() => openCreateReviewModal()} aria-label="Log Meal">
                         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
                         <span className={styles.hideMobileText}>Log Meal</span>
                     </button>
