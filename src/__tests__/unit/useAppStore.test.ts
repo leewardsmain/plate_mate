@@ -8,6 +8,7 @@ vi.mock('../../services/api', () => ({
         getReviews: vi.fn(),
         getUser: vi.fn(),
         createReview: vi.fn(),
+        updateReview: vi.fn(),
         deleteReview: vi.fn(),
         toggleLike: vi.fn(),
         addComment: vi.fn(),
@@ -86,7 +87,7 @@ describe('useAppStore — existing features', () => {
         const { result } = renderHook(() => useAppStore());
         const originalReview = result.current.feedReviews.find(r => r.id === 'r1');
 
-        vi.mocked(api.createReview).mockResolvedValue({ message: 'Updated' });
+        vi.mocked(api.updateReview).mockResolvedValue({ message: 'Updated' });
 
         await act(async () => {
             await result.current.updateReview('r1', {
@@ -99,7 +100,7 @@ describe('useAppStore — existing features', () => {
 
         const updatedReview = result.current.feedReviews.find(r => r.id === 'r1');
         expect(updatedReview?.text).toBe('Updated text here.');
-        expect(api.createReview).toHaveBeenCalled();
+        expect(api.updateReview).toHaveBeenCalled();
     });
 });
 

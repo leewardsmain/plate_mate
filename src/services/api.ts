@@ -87,6 +87,12 @@ export const api = {
             body: JSON.stringify(review)
         }),
 
+    updateReview: (id: string, updates: Partial<ApiReview>): Promise<{ message: string }> =>
+        apiRequest(`/reviews/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates)
+        }),
+
     deleteReview: (id: string): Promise<{ message: string }> =>
         apiRequest(`/reviews/${id}`, { method: 'DELETE' }),
 

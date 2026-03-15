@@ -360,7 +360,7 @@ export const useAppStore = create<AppState>((set, get) => ({
                     review.id === eventId ? { ...review, ...updatedData } : review
                 )
             }));
-            await api.createReview({ id: eventId, ...updatedData });
+            await api.updateReview(eventId, updatedData);
         } catch (error) {
             console.error("Update review failed:", error);
         }
