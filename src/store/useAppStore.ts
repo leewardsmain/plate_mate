@@ -18,6 +18,8 @@ export interface Comment {
     id: string;
     author: string;
     avatar: string;
+    userId?: string;
+    userHandle?: string;
     text: string;
     time: string;
 }
@@ -26,6 +28,8 @@ export interface DiningEvent {
     id: string;
     author: string;
     avatar: string;
+    userId?: string;
+    userHandle?: string;
     restaurantId: string;
     restaurantName: string;
     location: string;
@@ -319,8 +323,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         const newReview: DiningEvent = {
             ...newReviewData,
             id: `r_${Date.now()}`,
-            author: get().currentUser.name,
+            author: get().currentUser.name || get().currentUser.handle,
             avatar: get().currentUser.avatar,
+            userId: get().currentUser.id,
+            userHandle: get().currentUser.handle,
             likes: 0,
             comments: 0,
             likedBy: [],
@@ -397,14 +403,17 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     addComment: async (eventId, text) => {
         try {
-            await api.addComment(eventId, get().currentUser.name, text);
+            const authorName = get().currentUser.name || get().currentUser.handle;
+            await api.addComment(eventId, authorName, get().currentUser.id, get().currentUser.handle, text);
             set((state) => ({
                 feedReviews: state.feedReviews.map(review => {
                     if (review.id !== eventId) return review;
                     const newComment: Comment = {
                         id: `c_${Date.now()}`,
-                        author: state.currentUser.name,
+                        author: authorName,
                         avatar: state.currentUser.avatar,
+                        userId: get().currentUser.id,
+                        userHandle: get().currentUser.handle,
                         text,
                         time: 'Just now'
                     };

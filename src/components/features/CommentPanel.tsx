@@ -26,21 +26,28 @@ export function CommentPanel({ reviewId, comments }: CommentPanelProps) {
                 {comments.length === 0 ? (
                     <p className={styles.noComments}>No comments yet. Be the first!</p>
                 ) : (
-                    comments.map(comment => (
-                        <div key={comment.id} className={styles.commentItem}>
-                            <div
-                                className={styles.commentAvatar}
-                                style={{ backgroundImage: `url('${comment.avatar}')` }}
-                            />
-                            <div className={styles.commentContent}>
-                                <div className={styles.commentHeader}>
-                                    <span className={styles.commentAuthor}>{comment.author}</span>
-                                    <span className={styles.commentTime}>{comment.time}</span>
+                    comments.map(comment => {
+                        const isOwnComment = comment.userId === currentUser.id || (!comment.userId && comment.author === currentUser.name);
+                        const displayAuthor = isOwnComment 
+                            ? (currentUser.name || currentUser.handle) 
+                            : (comment.author || comment.userHandle || 'Anonymous User');
+
+                        return (
+                            <div key={comment.id} className={styles.commentItem}>
+                                <div
+                                    className={styles.commentAvatar}
+                                    style={{ backgroundImage: `url('${comment.avatar}')` }}
+                                />
+                                <div className={styles.commentContent}>
+                                    <div className={styles.commentHeader}>
+                                        <span className={styles.commentAuthor}>{displayAuthor}</span>
+                                        <span className={styles.commentTime}>{comment.time}</span>
+                                    </div>
+                                    <p className={styles.commentText}>{comment.text}</p>
                                 </div>
-                                <p className={styles.commentText}>{comment.text}</p>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
 

@@ -4,6 +4,8 @@ export interface ApiReview {
     id: string;
     author: string;
     avatar: string;
+    userId?: string;
+    userHandle?: string;
     restaurantId: string;
     restaurantName: string;
     location: string;
@@ -94,10 +96,10 @@ export const api = {
             body: JSON.stringify({ userId })
         }),
 
-    addComment: (reviewId: string, author: string, text: string): Promise<any> =>
+    addComment: (reviewId: string, author: string, userId: string, userHandle: string, text: string): Promise<any> =>
         apiRequest(`/reviews/${reviewId}/comments`, {
             method: 'POST',
-            body: JSON.stringify({ author, text })
+            body: JSON.stringify({ author, userId, userHandle, text })
         }),
 
     // Users

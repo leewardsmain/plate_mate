@@ -44,6 +44,10 @@ export default function Home() {
 
                 {reviews.map(review => {
                     const isLikedByMe = (review.likedBy || []).includes(currentUser.id);
+                    const isOwnReview = review.userId === currentUser.id || (!review.userId && review.author === currentUser.name);
+                    const displayAuthor = isOwnReview 
+                        ? (currentUser.name || currentUser.handle) 
+                        : (review.author || review.userHandle || 'Anonymous User');
 
                     return (
                         <article key={review.id} className={styles.reviewCard}>
@@ -52,7 +56,7 @@ export default function Home() {
                                     <div className={styles.rcAuthorAvatar} style={{ backgroundImage: `url('${review.avatar}')` }} />
                                     <div>
                                         <p style={{ color: 'var(--slate-200)' }}>
-                                            <span className={styles.rcAuthorName}>{review.author}</span> dined at{' '}
+                                            <span className={styles.rcAuthorName}>{displayAuthor}</span> dined at{' '}
                                             <Link to={`/restaurant/${review.restaurantId}`} className={styles.rcRestaurant}>{review.restaurantName}</Link>
                                         </p>
                                         <div className={styles.rcMeta}>
@@ -69,7 +73,7 @@ export default function Home() {
 
                                     </div>
                                 </div>
-                                {review.author === currentUser.name && (
+                                {isOwnReview && (
                                     <div style={{ position: 'relative' }}>
                                         <button
                                             style={{ background: 'none', border: 'none', color: 'var(--slate-500)', cursor: 'pointer' }}
