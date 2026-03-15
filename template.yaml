@@ -161,7 +161,7 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: nodejs20.x
-      CodeUri: s3://platemate-code-local/lambda.zip
+      CodeUri: lambda/
       MemorySize: 512
       Timeout: 30
       Policies:
