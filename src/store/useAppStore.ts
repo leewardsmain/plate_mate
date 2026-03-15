@@ -452,8 +452,23 @@ export const useAppStore = create<AppState>((set, get) => ({
             }
 
             await api.updateUser(get().currentUser.id, { avatar: finalUrl });
+
+            // Propagate avatar change to all reviews authored by this user
+            const currentName = get().currentUser.name;
+            const currentId = get().currentUser.id;
+            const myAuthoredReviews = get().feedReviews.filter(r => r.userId === currentId || (!r.userId && r.author === currentName));
+
+            await Promise.all(myAuthoredReviews.map(review =>
+                api.updateReview(review.id, { avatar: finalUrl }).catch(e => console.error(`Failed to update avatar on review ${review.id}`, e))
+            ));
+
             set((state) => ({
-                currentUser: { ...state.currentUser, avatar: finalUrl }
+                currentUser: { ...state.currentUser, avatar: finalUrl },
+                feedReviews: state.feedReviews.map(r =>
+                    (r.userId === currentId || (!r.userId && r.author === currentName))
+                        ? { ...r, avatar: finalUrl }
+                        : r
+                )
             }));
         } catch (error) {
             console.error("Avatar status change failed:", error);

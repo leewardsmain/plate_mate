@@ -255,9 +255,22 @@ exports.handler = async (event) => {
         else if (httpMethod === 'PUT' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
             console.log(`Updating user ${userId} in ${USERS_TABLE}...`);
-            await ddbDocClient.send(new PutCommand({
+
+            const updateKeys = Object.keys(body);
+            if (updateKeys.length === 0) {
+                return { statusCode: 400, headers, body: JSON.stringify({ error: "No update fields provided" }) };
+            }
+
+            const UpdateExpression = "SET " + updateKeys.map((k, i) => `#field${i} = :val${i}`).join(", ");
+            const ExpressionAttributeNames = updateKeys.reduce((acc, k, i) => ({ ...acc, [`#field${i}`]: k }), {});
+            const ExpressionAttributeValues = updateKeys.reduce((acc, k, i) => ({ ...acc, [`:val${i}`]: body[k] }), {});
+
+            await ddbDocClient.send(new UpdateCommand({
                 TableName: USERS_TABLE,
-                Item: { userId, ...body }
+                Key: { userId },
+                UpdateExpression,
+                ExpressionAttributeNames,
+                ExpressionAttributeValues
             }));
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Profile updated" }) };
         }

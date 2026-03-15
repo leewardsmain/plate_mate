@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .topNav {
@@ -11,17 +12,29 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
+    padding: 0.5rem 1rem;
     background: var(--glass-surface);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--glass-border);
 }
 
+@media (min-width: 640px) {
+    .topNav {
+        padding: 1rem 1.5rem;
+    }
+}
+
 .logoArea {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .logoArea {
+        gap: 1rem;
+    }
 }
 
 .logoIcon {
@@ -30,10 +43,16 @@
 }
 
 .logoText {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 800;
     letter-spacing: -0.025em;
     color: var(--text-primary);
+}
+
+@media (min-width: 640px) {
+    .logoText {
+        font-size: 1.25rem;
+    }
 }
 
 .searchWrapper {
@@ -51,7 +70,13 @@
 .navActions {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .navActions {
+        gap: 1.5rem;
+    }
 }
 
 .iconButton {
@@ -76,9 +101,15 @@
     background: var(--primary);
     color: var(--bg-dark);
     font-weight: 700;
-    padding: 0.625rem 1.25rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 9999px;
     transition: transform 0.2s;
+}
+
+@media (min-width: 640px) {
+    .primaryButton {
+        padding: 0.625rem 1.25rem;
+    }
 }
 
 .primaryButton:active {
