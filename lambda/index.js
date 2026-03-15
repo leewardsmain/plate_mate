@@ -380,8 +380,23 @@ exports.handler = async (event) => {
                 return { statusCode: 401, headers, body: JSON.stringify({ error: "Google API Key missing" }) };
             }
 
-            if (location) query = `${query} in ${location}`;
-            const googleUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${GOOGLE_API_KEY}`;
+            if (location) {
+                // Check if location is a coordinate pair (lat,lng)
+                // e.g., "37.77,-122.42" or "37.7749, -122.4194"
+                const coordinateRegex = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
+                
+                if (coordinateRegex.test(location.trim())) {
+                    // It's a coordinate pair. Use location and radius (e.g., 50km)
+                    const cleanCoords = location.replace(/\s/g, '');
+                    googleUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&location=${cleanCoords}&radius=50000&key=${GOOGLE_API_KEY}`;
+                } else {
+                    // Standard location name or zip code
+                    query = `${query} in ${location}`;
+                    googleUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${GOOGLE_API_KEY}`;
+                }
+            } else {
+               googleUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${GOOGLE_API_KEY}`;
+            }
             
             console.log(`SEARCH: Calling Google API: ${googleUrl.replace(GOOGLE_API_KEY, "HIDDEN")}`);
             

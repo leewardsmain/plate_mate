@@ -12,7 +12,13 @@ const getRestApiId = async () => {
         const res = await fetch('http://localhost:4566/restapis');
         const data: any = await res.json();
         if (data.items && data.items.length > 0) {
-            const apiId = data.items[0].id; // Pick first one
+            const apiId = data.items[0].id;
+            // Try Prod stage first (our script default)
+            const prodUrl = `http://localhost:4566/restapis/${apiId}/Prod/_user_request_`;
+            const testRes = await fetch(`${prodUrl}/reviews`);
+            if (testRes.status !== 404) return prodUrl;
+            
+            // Fallback to dev
             return `http://localhost:4566/restapis/${apiId}/dev/_user_request_`;
         }
     } catch (e) {
@@ -20,7 +26,7 @@ const getRestApiId = async () => {
     }
     
     // Fallback to a common localstack default if discovery fails
-    return 'http://localhost:4566/restapis/local/dev/_user_request_';
+    return 'http://localhost:4566/restapis/local/Prod/_user_request_';
 };
 
 describe('Backend API Integration Tests (LocalStack)', () => {
@@ -99,6 +105,18 @@ describe('Backend API Integration Tests (LocalStack)', () => {
             expect(Array.isArray(data)).toBe(true);
             // It might return empty from Google if API key is invalid/missing
             // Our backend has a mock fallback
+        });
+
+        it('should search for a restaurant using coordinates (GET /restaurants/search?q=...&location=lat,lng)', async () => {
+            // New York City coordinates roughly
+            const res = await fetch(`${baseUrl}/restaurants/search?q=pizza&location=40.7128,-74.0060`);
+            expect(res.status).toBe(200);
+            const data = await res.json() as any;
+            expect(Array.isArray(data)).toBe(true);
+            if (data.length > 0) {
+                expect(data[0]).toHaveProperty('place_id');
+                expect(data[0]).toHaveProperty('name');
+            }
         });
 
         it('should fetch restaurant details (GET /restaurants/{placeId})', async () => {
