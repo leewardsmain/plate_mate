@@ -116,6 +116,12 @@ body {
   /* Changed from background-color to support gradients */
   color: var(--text-primary);
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+#root {
+  max-width: 100vw;
   overflow-x: hidden;
 }
 
