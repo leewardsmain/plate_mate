@@ -43,7 +43,7 @@ export default function Home() {
                 </div>
 
                 {reviews.map(review => {
-                    const isLikedByMe = review.likedBy.includes(currentUser.id);
+                    const isLikedByMe = (review.likedBy || []).includes(currentUser.id);
 
                     return (
                         <article key={review.id} className={styles.reviewCard}>

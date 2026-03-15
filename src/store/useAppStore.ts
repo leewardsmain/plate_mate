@@ -252,8 +252,14 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
 
         try {
-            const reviews = await api.getReviews().catch(() => []);
-            if (reviews && reviews.length > 0) {
+            const rawReviews = await api.getReviews().catch(() => []);
+            if (rawReviews && rawReviews.length > 0) {
+                const reviews = rawReviews.map(r => ({
+                    ...r,
+                    likedBy: r.likedBy || [],
+                    commentsList: r.commentsList || [],
+                    dishes: r.dishes || []
+                }));
                 set({ feedReviews: reviews });
             }
 
