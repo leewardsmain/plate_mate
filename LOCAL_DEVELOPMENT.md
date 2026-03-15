@@ -42,11 +42,17 @@ We provide an automated script to package and deploy everything (Lambda, S3, Clo
 ./deploy-local.ps1
 ```
 
+**Live Google Places API vs. Mock Data:**
+By default, the local backend uses mock data for restaurant searches to avoid requiring API keys during initial setup. However, you can enable live Google Places data:
+1. Create a `.env.local` file in the project root.
+2. Add your Google API Key: `GOOGLE_API_KEY=your_actual_api_key_here`
+3. Run `./deploy-local.ps1`. The script will detect your key, automatically set `UseMockData=false`, and deploy the Lambda with your live credentials.
+
 This script will:
 1. Zip the Lambda logic in `lambda/`.
-2. Upload it to the local S3 bucket.
+2. Upload it to the local S3 bucket (`s3://platemate-frontend-app`).
 3. Deploy the `template.yaml`.
-4. Output your `VITE_API_URL`.
+4. Output your `VITE_API_URL` and automatically update your `.env.local` file.
 
 For manual deployment or detailed resource troubleshooting, see [INFRASTRUCTURE.md](./docs/INFRASTRUCTURE.md).
 

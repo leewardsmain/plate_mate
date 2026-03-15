@@ -121,9 +121,11 @@ export default function Home() {
                                                             {dish.rating.toFixed(1)}
                                                         </div>
                                                     )}
-                                                    <div className={`${styles.dcSentiment} ${styles[dish.sentiment]}`}>
-                                                        {dish.sentiment === 'love' ? 'Love it' : 'Leave it'}
-                                                    </div>
+                                                    {dish.sentiment !== 'none' && (
+                                                        <div className={`${styles.dcSentiment} ${styles[dish.sentiment]}`}>
+                                                            {dish.sentiment === 'love' ? 'Love it' : dish.sentiment === 'fine' ? 'Just Fine' : 'Leave it'}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

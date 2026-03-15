@@ -1,27 +1,25 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: 'PlateMate Production Infrastructure'
-
+Description: PlateMate Production Infrastructure
 Parameters:
   GoogleApiKey:
     Type: String
-    Default: ""
+    Default: ''
     Description: Google Maps/Places API Key
     NoEcho: true
   UseMockData:
     Type: String
-    Default: "true"
-    AllowedValues: ["true", "false"]
-    Description: Whether to use mock data for restaurant searches if API fails or is missing
-
+    Default: 'true'
+    AllowedValues:
+    - 'true'
+    - 'false'
+    Description: Whether to use mock data for restaurant searches if API fails or
+      is missing
   ProjectName:
     Type: String
     Default: platemate
     Description: Project name for resource naming
-
 Resources:
-
-  # 1. S3 Bucket for the Frontend SPA
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -30,21 +28,24 @@ Resources:
         ErrorDocument: index.html
       CorsConfiguration:
         CorsRules:
-          - AllowedHeaders: ["*"]
-            AllowedMethods: ["PUT", "POST", "GET"]
-            AllowedOrigins: ["*"]
-            MaxAge: 3000
-
-  # 1.5 Cognito User Pool
+        - AllowedHeaders:
+          - '*'
+          AllowedMethods:
+          - PUT
+          - POST
+          - GET
+          AllowedOrigins:
+          - '*'
+          MaxAge: 3000
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: false
       AutoVerifiedAttributes:
-        - email
+      - email
       UsernameAttributes:
-        - email
+      - email
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -52,28 +53,24 @@ Resources:
           RequireNumbers: true
           RequireSymbols: true
           RequireUppercase: true
-
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      UserPoolId: !Ref UserPool
+      UserPoolId:
+        Ref: UserPool
       ExplicitAuthFlows:
-        - ALLOW_USER_PASSWORD_AUTH
-        - ALLOW_REFRESH_TOKEN_AUTH
-        - ALLOW_USER_SRP_AUTH
+      - ALLOW_USER_PASSWORD_AUTH
+      - ALLOW_REFRESH_TOKEN_AUTH
+      - ALLOW_USER_SRP_AUTH
       GenerateSecret: false
-
-  # 2. CloudFront Distribution
   CloudFrontOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Description: "OAC for PlateMate Frontend"
-        Name: !Sub "${AWS::StackName}-OAC"
+        Description: OAC for PlateMate Frontend
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
-
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -81,107 +78,120 @@ Resources:
         Enabled: true
         DefaultRootObject: index.html
         CustomErrorResponses:
-          - ErrorCode: 403
-            ResponseCode: 200
-            ResponsePagePath: /index.html
-          - ErrorCode: 404
-            ResponseCode: 200
-            ResponsePagePath: /index.html
+        - ErrorCode: 403
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+        - ErrorCode: 404
+          ResponseCode: 200
+          ResponsePagePath: /index.html
         Origins:
-          - DomainName: !GetAtt FrontendBucket.RegionalDomainName
-            Id: S3Origin
-            OriginAccessControlId: !Ref CloudFrontOriginAccessControl
-            S3OriginConfig: {}
+        - DomainName:
+            Fn::GetAtt:
+            - FrontendBucket
+            - RegionalDomainName
+          Id: S3Origin
+          OriginAccessControlId:
+            Ref: CloudFrontOriginAccessControl
         DefaultCacheBehavior:
           TargetOriginId: S3Origin
           ViewerProtocolPolicy: redirect-to-https
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
           Compress: true
-
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
-    DependsOn: FrontendBucket
     Properties:
-      Bucket: !Ref FrontendBucket
+      Bucket:
+        Ref: FrontendBucket
       PolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
-          - Effect: Allow
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${FrontendBucket}/*"
-
-  # 3. DynamoDB Tables
+        - Effect: Allow
+          Principal:
+            Service: cloudfront.amazonaws.com
+          Action: s3:GetObject
+          Resource:
+            Fn::Sub: ${FrontendBucket.Arn}/*
   UsersTable:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: userId
-          AttributeType: S
+      - AttributeName: userId
+        AttributeType: S
       KeySchema:
-        - AttributeName: userId
-          KeyType: HASH
+      - AttributeName: userId
+        KeyType: HASH
       BillingMode: PAY_PER_REQUEST
-
   ReviewsTable:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: reviewId
-          AttributeType: S
-        - AttributeName: userId
-          AttributeType: S
+      - AttributeName: reviewId
+        AttributeType: S
+      - AttributeName: userId
+        AttributeType: S
       KeySchema:
-        - AttributeName: reviewId
-          KeyType: HASH
+      - AttributeName: reviewId
+        KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName: UserReviewsIndex
-          KeySchema:
-            - AttributeName: userId
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
+      - IndexName: UserReviewsIndex
+        KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        Projection:
+          ProjectionType: ALL
       BillingMode: PAY_PER_REQUEST
-
   RestaurantsTable:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: placeId
-          AttributeType: S
+      - AttributeName: placeId
+        AttributeType: S
       KeySchema:
-        - AttributeName: placeId
-          KeyType: HASH
+      - AttributeName: placeId
+        KeyType: HASH
       BillingMode: PAY_PER_REQUEST
-
-  # 5. Lambda Function (using Serverless Function for SAM features)
   ApiLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
       Runtime: nodejs20.x
-      CodeUri: s3://platemate-code-local/lambda.zip
+      CodeUri: s3://platemate-frontend-app/8fb3b8500a8dfc9e8a47fce7af53da09
       MemorySize: 512
       Timeout: 30
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref UsersTable
-        - DynamoDBCrudPolicy:
-            TableName: !Ref ReviewsTable
-        - DynamoDBCrudPolicy:
-            TableName: !Ref RestaurantsTable
-        - S3CrudPolicy:
-            BucketName: !Ref FrontendBucket
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: UsersTable
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ReviewsTable
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: RestaurantsTable
+      - S3CrudPolicy:
+          BucketName:
+            Ref: FrontendBucket
       Environment:
         Variables:
-          REVIEWS_TABLE: !Ref ReviewsTable
-          USERS_TABLE: !Ref UsersTable
-          AVATAR_BUCKET: !Ref FrontendBucket
-          RESTAURANTS_TABLE: !Ref RestaurantsTable
-          GOOGLE_API_KEY: !Ref GoogleApiKey
-          USE_MOCK_DATA: !Ref UseMockData
-          CLOUDFRONT_DOMAIN: !GetAtt CloudFrontDistribution.DomainName
+          REVIEWS_TABLE:
+            Ref: ReviewsTable
+          USERS_TABLE:
+            Ref: UsersTable
+          AVATAR_BUCKET:
+            Ref: FrontendBucket
+          RESTAURANTS_TABLE:
+            Ref: RestaurantsTable
+          GOOGLE_API_KEY:
+            Ref: GoogleApiKey
+          USE_MOCK_DATA:
+            Ref: UseMockData
+          CLOUDFRONT_DOMAIN:
+            Fn::GetAtt:
+            - CloudFrontDistribution
+            - DomainName
       Events:
         ProxyResource:
           Type: Api
@@ -193,23 +203,30 @@ Resources:
           Properties:
             Path: /
             Method: ANY
-
 Outputs:
   FrontendBucketName:
-    Value: !Ref FrontendBucket
+    Value:
+      Ref: FrontendBucket
     Description: Name of the Amazon S3 bucket used for frontend hosting.
   CloudFrontDomain:
-    Value: !GetAtt CloudFrontDistribution.DomainName
+    Value:
+      Fn::GetAtt:
+      - CloudFrontDistribution
+      - DomainName
     Description: Domain name of the CloudFront distribution for the frontend.
   CloudFrontDistributionId:
-    Value: !Ref CloudFrontDistribution
+    Value:
+      Ref: CloudFrontDistribution
     Description: ID of the CloudFront distribution.
   ApiEndpoint:
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod
     Description: production URL of the API Gateway endpoint.
   UserPoolId:
-    Value: !Ref UserPool
+    Value:
+      Ref: UserPool
     Description: ID of the Cognito User Pool.
   UserPoolClientId:
-    Value: !Ref UserPoolClient
+    Value:
+      Ref: UserPoolClient
     Description: ID of the Cognito User Pool Client.

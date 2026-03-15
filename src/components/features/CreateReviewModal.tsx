@@ -10,7 +10,7 @@ interface DishReview {
     id: string;
     name: string;
     rating?: number;
-    sentiment: 'love' | 'leave' | 'none';
+    sentiment: 'love' | 'fine' | 'leave' | 'none';
     img?: string;
     isUploading?: boolean;
 }
@@ -283,6 +283,13 @@ export function CreateReviewModal({ initialRestaurantId }: { initialRestaurantId
                                                 >
                                                     <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
                                                     Love it
+                                                </button>
+                                                <button
+                                                    className={`${styles.sentimentBtn} ${styles.fine} ${dish.sentiment === 'fine' ? styles.active : ''}`}
+                                                    onClick={() => updateDish(dish.id, 'sentiment', dish.sentiment === 'fine' ? 'none' : 'fine')}
+                                                >
+                                                    <span className="material-symbols-outlined">sentiment_satisfied</span>
+                                                    Just Fine
                                                 </button>
                                                 <button
                                                     className={`${styles.sentimentBtn} ${styles.leave} ${dish.sentiment === 'leave' ? styles.active : ''}`}

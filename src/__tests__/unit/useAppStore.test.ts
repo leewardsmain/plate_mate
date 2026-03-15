@@ -30,7 +30,7 @@ describe('useAppStore — existing features', () => {
     it('initializes with default values', () => {
         const { result } = renderHook(() => useAppStore());
         expect(result.current.isCreateReviewModalOpen).toBe(false);
-        expect(result.current.currentUser.name).toBe('Alex Chen');
+        expect(result.current.currentUser.name).toBe('');
         expect(result.current.feedReviews.length).toBeGreaterThan(0);
     });
 

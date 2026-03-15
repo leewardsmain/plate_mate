@@ -264,6 +264,10 @@
     color: var(--primary);
 }
 
+.dcBadge.fine {
+    color: var(--blue-400, #60a5fa);
+}
+
 .dcBadge.leave {
     color: var(--slate-400);
 }
@@ -310,6 +314,10 @@
 
 .dcSentiment.love {
     color: var(--tag-primary-text);
+}
+
+.dcSentiment.fine {
+    color: var(--blue-400, #60a5fa);
 }
 
 .dcSentiment.leave {

@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import type { Toast, ToastType } from '../components/ui/Toast';
 import { fetchAuthSession, signOut as amplifySignOut } from '../services/authAdapter';
 
-export type Sentiment = 'love' | 'leave' | 'none';
+export type Sentiment = 'love' | 'fine' | 'leave' | 'none';
 
 export interface DishReview {
     id: string;
@@ -180,20 +180,20 @@ const INITIAL_STATE = {
     activeEditReviewId: null,
     activeEditDishId: null,
     currentUser: {
-        id: 'user_1',
-        email: 'alex.chen@example.com',
-        name: 'Alex Chen',
-        handle: 'alexeats',
-        avatar: 'https://i.pravatar.cc/150?img=32',
-        reviewCount: 142,
-        followerCount: '8.5k',
-        bio: 'Always hunting for the best spicy ramen in town. Amateur chef and professional eater. 🍜🌶️',
-        location: 'San Francisco, CA',
-        favCuisine: 'Japanese',
+        id: '',
+        email: '',
+        name: '',
+        handle: '',
+        avatar: '',
+        reviewCount: 0,
+        followerCount: '0',
+        bio: '',
+        location: '',
+        favCuisine: '',
         savedRestaurants: [],
-        foodTags: ['Japanese', 'Italian', 'Ramen', 'Seafood'],
+        foodTags: [],
         socialLinks: {
-            instagram: 'alexeats',
+            instagram: '',
             twitter: ''
         }
     },
@@ -267,7 +267,7 @@ export const useAppStore = create<AppState>((set, get) => ({
                         name: storeUser.name,
                         email: storeUser.email,
                         handle: storeUser.handle,
-                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(storeUser.name)}&background=random`,
+                        avatar: '',
                         reviewCount: 0,
                     };
                     await api.updateUser(currentUserId, newUserProfile);

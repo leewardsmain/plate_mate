@@ -20,7 +20,8 @@ aws s3 mb s3://$CODE_BUCKET --endpoint-url $ENDPOINT 2>$null
 # Wait for bucket to be ready
 $retry = 0
 while ($retry -lt 10) {
-    if (aws s3api head-bucket --bucket $CODE_BUCKET --endpoint-url $ENDPOINT 2>$null) {
+    $bucketExists = aws s3api head-bucket --bucket $CODE_BUCKET --endpoint-url $ENDPOINT 2>$null
+    if ($LASTEXITCODE -eq 0) {
         Write-Host "Bucket $CODE_BUCKET is ready." -ForegroundColor Green
         break
     }
@@ -33,15 +34,19 @@ while ($retry -lt 10) {
 New-Item -Path "cors.json" -ItemType "file" -Value '{"CORSRules":[{"AllowedHeaders":["*"],"AllowedMethods":["PUT","GET","POST"],"AllowedOrigins":["*"],"ExposeHeaders":[]}]}' -Force | Out-Null
 aws s3api put-bucket-cors --bucket $CODE_BUCKET --cors-configuration file://cors.json --endpoint-url $ENDPOINT
 
-# 1. Package the template (handles zipping ./lambda and uploading to S3)
-Write-Host "--- Packaging Template ---" -ForegroundColor Cyan
-aws cloudformation package `
-    --template-file template.yaml `
-    --s3-bucket $CODE_BUCKET `
-    --output-template-file packaged.yaml `
-    --endpoint-url $ENDPOINT
+# 1. Zip Lambda code
+Write-Host "--- Packaging Lambda ---" -ForegroundColor Cyan
+if (Test-Path "lambda.zip") { Remove-Item "lambda.zip" }
+# Navigate into lambda dir to zip contents correctly
+Push-Location lambda
+Compress-Archive -Path * -DestinationPath "..\lambda.zip" -Force
+Pop-Location
 
-# 2. Deploy the packaged template
+# 2. Upload to S3 directly
+Write-Host "--- Uploading Lambda to S3 ---" -ForegroundColor Cyan
+aws s3 cp lambda.zip s3://$CODE_BUCKET/lambda.zip --endpoint-url $ENDPOINT
+
+# 3. Deploy the template
 Write-Host "--- Deploying CloudFormation Stack ---" -ForegroundColor Cyan
 
 # Load from .env.local if available
@@ -65,7 +70,7 @@ if ($googleKey) {
 
 aws --no-cli-pager cloudformation deploy `
     --stack-name platemate-local-v2 `
-    --template-file packaged.yaml `
+    --template-file template.yaml `
     --capabilities CAPABILITY_NAMED_IAM `
     --endpoint-url $ENDPOINT `
     --parameter-overrides GoogleApiKey="$googleKey" UseMockData="$useMock"

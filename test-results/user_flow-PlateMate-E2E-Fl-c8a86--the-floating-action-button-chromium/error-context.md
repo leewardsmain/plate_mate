@@ -1,0 +1,215 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: restaurant_menu
+        - generic [ref=e7]: PlateMate
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: search
+          - textbox "Restaurants..." [ref=e13]
+        - generic [ref=e14]:
+          - textbox "Zip..." [ref=e15]
+          - button "my_location" [ref=e16] [cursor=pointer]:
+            - generic [ref=e17]: my_location
+      - generic [ref=e18]:
+        - button "dark_mode" [ref=e19] [cursor=pointer]:
+          - generic [ref=e20]: dark_mode
+        - button "notifications" [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]: notifications
+        - button "chat_bubble" [ref=e23] [cursor=pointer]:
+          - generic [ref=e24]: chat_bubble
+        - button "Log Meal" [ref=e25] [cursor=pointer]:
+          - generic [ref=e26]: add
+          - generic [ref=e27]: Log Meal
+        - link [ref=e28] [cursor=pointer]:
+          - /url: /profile
+    - main [ref=e29]:
+      - complementary [ref=e30]:
+        - navigation [ref=e31]:
+          - link "rss_feed Feed" [ref=e33] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e34]: rss_feed
+            - generic [ref=e35]: Feed
+          - link "storefront Restaurants" [ref=e37] [cursor=pointer]:
+            - /url: /restaurants
+            - generic [ref=e38]: storefront
+            - generic [ref=e39]: Restaurants
+          - link "person Profile" [ref=e41] [cursor=pointer]:
+            - /url: /profile
+            - generic [ref=e42]: person
+            - generic [ref=e43]: Profile
+          - generic [ref=e44]:
+            - button "settings Settings add" [ref=e45] [cursor=pointer]:
+              - generic [ref=e46]: settings
+              - generic [ref=e47]: Settings
+              - generic [ref=e48]: add
+            - generic:
+              - link "person Profile Details" [ref=e49] [cursor=pointer]:
+                - /url: /settings
+                - generic [ref=e50]: person
+                - text: Profile Details
+              - button "logout Sign Out" [ref=e51] [cursor=pointer]:
+                - generic [ref=e52]: logout
+                - text: Sign Out
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - heading "Activity Feed" [level=1] [ref=e57]
+          - generic [ref=e58]:
+            - generic [ref=e59]: "Sort by:"
+            - generic [ref=e60]:
+              - text: Recent
+              - generic [ref=e61]: expand_more
+        - article [ref=e62]:
+          - generic [ref=e66]:
+            - paragraph [ref=e67]:
+              - text: John Doe dined at
+              - link "Nobu Downtown" [ref=e68] [cursor=pointer]:
+                - /url: /restaurant/nobu
+            - generic [ref=e69]:
+              - generic [ref=e70]: location_on
+              - link "New York, NY" [ref=e71] [cursor=pointer]:
+                - /url: https://www.google.com/maps/search/?api=1&query=Nobu%20Downtown%2C%20New%20York%2C%20NY
+              - generic [ref=e72]: •
+              - text: 2h ago
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: "\"Absolutely incredible omakase experience. The Black Cod is a must-try, but skip the shishito peppers if you're looking for something unique.\""
+            - generic [ref=e75]:
+              - generic [ref=e77]:
+                - heading "Miso Black Cod" [level=4] [ref=e78]
+                - generic [ref=e79]:
+                  - generic [ref=e80]:
+                    - generic [ref=e81]: star
+                    - text: "5.0"
+                  - generic [ref=e82]: Love it
+              - generic [ref=e84]:
+                - heading "Spicy Tuna Crispy Rice" [level=4] [ref=e85]
+                - generic [ref=e86]:
+                  - generic [ref=e87]:
+                    - generic [ref=e88]: star
+                    - text: "4.8"
+                  - generic [ref=e89]: Love it
+              - generic [ref=e91]:
+                - heading "Shishito Peppers" [level=4] [ref=e92]
+                - generic [ref=e93]:
+                  - generic [ref=e94]:
+                    - generic [ref=e95]: star
+                    - text: "2.5"
+                  - generic [ref=e96]: Leave it
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - button "favorite 0" [ref=e99] [cursor=pointer]:
+                - generic [ref=e100]: favorite
+                - text: "0"
+              - button "chat_bubble 0" [ref=e101] [cursor=pointer]:
+                - generic [ref=e102]: chat_bubble
+                - text: "0"
+            - button "share" [ref=e103] [cursor=pointer]:
+              - generic [ref=e104]: share
+        - article [ref=e105]:
+          - generic [ref=e109]:
+            - paragraph [ref=e110]:
+              - text: Sarah Miller dined at
+              - link "Lilia" [ref=e111] [cursor=pointer]:
+                - /url: /restaurant/lilia
+            - generic [ref=e112]:
+              - generic [ref=e113]: location_on
+              - link "Brooklyn, NY" [ref=e114] [cursor=pointer]:
+                - /url: https://www.google.com/maps/search/?api=1&query=Lilia%2C%20Brooklyn%2C%20NY
+              - generic [ref=e115]: •
+              - text: 5h ago
+          - generic [ref=e116]:
+            - paragraph [ref=e117]: "\"Finally got a reservation! The pasta is worth the hype. Best cacio e pepe I've ever had.\""
+            - generic [ref=e118]:
+              - generic [ref=e120]:
+                - heading "Sheep's Milk Cheese Agnolotti" [level=4] [ref=e121]
+                - generic [ref=e122]:
+                  - generic [ref=e123]:
+                    - generic [ref=e124]: star
+                    - text: "4.5"
+                  - generic [ref=e125]: Love it
+              - generic [ref=e127]:
+                - heading "Chocolate Gelato" [level=4] [ref=e128]
+                - generic [ref=e129]:
+                  - generic [ref=e130]:
+                    - generic [ref=e131]: star
+                    - text: "4.0"
+                  - generic [ref=e132]: Love it
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - button "favorite 0" [ref=e135] [cursor=pointer]:
+                - generic [ref=e136]: favorite
+                - text: "0"
+              - button "chat_bubble 0" [ref=e137] [cursor=pointer]:
+                - generic [ref=e138]: chat_bubble
+                - text: "0"
+            - button "share" [ref=e139] [cursor=pointer]:
+              - generic [ref=e140]: share
+        - article [ref=e141]:
+          - generic [ref=e145]:
+            - paragraph [ref=e146]:
+              - text: Alex Chen dined at
+              - link "Lilia" [ref=e147] [cursor=pointer]:
+                - /url: /restaurant/lilia
+            - generic [ref=e148]:
+              - generic [ref=e149]: location_on
+              - link "Brooklyn, NY" [ref=e150] [cursor=pointer]:
+                - /url: https://www.google.com/maps/search/?api=1&query=Lilia%2C%20Brooklyn%2C%20NY
+              - generic [ref=e151]: •
+              - text: 1h ago
+          - generic [ref=e152]:
+            - paragraph [ref=e153]: "\"Testing my own review. The sheep's milk agnolotti is life-changing!\""
+            - generic [ref=e156]:
+              - heading "Sheep's Milk Cheese Agnolotti" [level=4] [ref=e157]
+              - generic [ref=e158]:
+                - generic [ref=e159]:
+                  - generic [ref=e160]: star
+                  - text: "5.0"
+                - generic [ref=e161]: Love it
+          - generic [ref=e162]:
+            - generic [ref=e163]:
+              - button "favorite 5" [ref=e164] [cursor=pointer]:
+                - generic [ref=e165]: favorite
+                - text: "5"
+              - button "chat_bubble 2" [ref=e166] [cursor=pointer]:
+                - generic [ref=e167]: chat_bubble
+                - text: "2"
+            - button "share" [ref=e168] [cursor=pointer]:
+              - generic [ref=e169]: share
+  - generic [ref=e171]:
+    - generic [ref=e172]:
+      - generic [ref=e173]:
+        - generic [ref=e174]:
+          - heading "Log a Meal" [level=2] [ref=e175]
+          - generic [ref=e176]: Step 1 of 2
+        - button "close" [ref=e177] [cursor=pointer]:
+          - generic [ref=e178]: close
+      - generic [ref=e181]:
+        - generic [ref=e182]: Select Venue
+        - generic [ref=e183]: Add Dishes
+    - generic [ref=e185]:
+      - heading "Where did you eat?" [level=1] [ref=e186]
+      - paragraph [ref=e187]: Find the spot to start your review.
+      - generic [ref=e188]:
+        - generic [ref=e189]:
+          - generic [ref=e190]:
+            - generic [ref=e191]: search
+            - textbox "Restaurants..." [active] [ref=e192]: pizza
+          - generic [ref=e193]:
+            - textbox "Zip..." [ref=e194]
+            - button "my_location" [ref=e195] [cursor=pointer]:
+              - generic [ref=e196]: my_location
+        - generic [ref=e197]:
+          - generic [ref=e199]:
+            - generic [ref=e200]: search_off
+            - generic [ref=e201]: No restaurants found
+          - generic [ref=e202] [cursor=pointer]:
+            - generic [ref=e203]: See all results for "pizza"
+            - generic [ref=e204]: arrow_forward
+    - 'button "Next: Add Dishes arrow_forward" [disabled] [ref=e206]':
+      - text: "Next: Add Dishes"
+      - generic [ref=e207]: arrow_forward
+```

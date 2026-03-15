@@ -155,6 +155,13 @@ export function EditReviewModal() {
                                             Love it
                                         </button>
                                         <button
+                                            className={`${styles.sentimentBtn} ${styles.fine} ${dish.sentiment === 'fine' ? styles.active : ''}`}
+                                            onClick={() => toggleSentiment(dish.id, dish.sentiment === 'fine' ? 'none' : 'fine')}
+                                        >
+                                            <span className="material-symbols-outlined">sentiment_satisfied</span>
+                                            Just Fine
+                                        </button>
+                                        <button
                                             className={`${styles.sentimentBtn} ${styles.leave} ${dish.sentiment === 'leave' ? styles.active : ''}`}
                                             onClick={() => toggleSentiment(dish.id, 'leave')}
                                         >

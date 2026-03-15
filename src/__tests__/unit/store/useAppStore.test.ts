@@ -17,9 +17,10 @@ describe('App Store', () => {
     it('should update current user', async () => {
         const updates = { name: 'Updated Name', bio: 'New Bio' };
 
+        useAppStore.setState({ currentUser: { ...useAppStore.getState().currentUser, id: 'test_user_1' } });
         await useAppStore.getState().updateCurrentUser(updates);
 
-        expect(api.updateUser).toHaveBeenCalledWith('user_1', updates);
+        expect(api.updateUser).toHaveBeenCalledWith('test_user_1', updates);
         const state = useAppStore.getState();
         expect(state.currentUser.name).toBe('Updated Name');
         expect(state.currentUser.bio).toBe('New Bio');

@@ -27,7 +27,7 @@ export default function RestaurantView() {
         return feedReviews.filter(r => r.restaurantId === id);
     }, [feedReviews, id]);
 
-    const groupSentiments = (sentimentType: 'love' | 'leave') => {
+    const groupSentiments = (sentimentType: 'love' | 'fine' | 'leave') => {
         const dishMap = new Map();
         restaurantReviews.forEach(rev => {
             rev.dishes.forEach(dish => {
@@ -41,7 +41,10 @@ export default function RestaurantView() {
                     } else {
                         const existing = dishMap.get(dish.name);
                         existing.count += 1;
-                        existing.desc = `${existing.count} people ${sentimentType === 'love' ? 'loved' : 'disliked'} this. "${rev.text}" - ${rev.author}`;
+                        let verb = 'loved';
+                        if (sentimentType === 'fine') verb = 'thought it was fine';
+                        if (sentimentType === 'leave') verb = 'disliked';
+                        existing.desc = `${existing.count} people ${verb} this. "${rev.text}" - ${rev.author}`;
                     }
                 }
             });
@@ -50,6 +53,7 @@ export default function RestaurantView() {
     };
 
     const loveItItems = useMemo(() => groupSentiments('love'), [restaurantReviews]);
+    const fineItems = useMemo(() => groupSentiments('fine'), [restaurantReviews]);
     const leaveItItems = useMemo(() => groupSentiments('leave'), [restaurantReviews]);
 
     const myVisits = useMemo(() => {
@@ -65,6 +69,7 @@ export default function RestaurantView() {
             v.dishes.forEach(d => {
                 let score = d.rating || 0;
                 if (d.sentiment === 'love') score += 0.5;
+                if (d.sentiment === 'fine') score += 0.2;
                 if (score > highestScore) {
                     highestScore = score;
                     bestDish = d.name;
@@ -86,7 +91,7 @@ export default function RestaurantView() {
                     reviewerImg: rev.avatar,
                     desc: rev.text,
                     rating: dish.rating,
-                    score: dish.sentiment === 'love' ? 'LOVE' : dish.sentiment === 'leave' ? 'LEAVE' : ''
+                    score: dish.sentiment === 'love' ? 'LOVE' : dish.sentiment === 'fine' ? 'FINE' : dish.sentiment === 'leave' ? 'LEAVE' : ''
                 });
             });
         });
@@ -172,7 +177,7 @@ export default function RestaurantView() {
 
                 <div className={styles.heroOverlay} />
                 <div className={styles.heroContent}>
-                    <div>
+                    <div className={styles.heroInfoBox}>
                         <div className={styles.heroTags}>
                             <span className={`${styles.tag} ${styles.tagPrimary}`}>Restaurant</span>
                             <span className={`${styles.tag} ${styles.tagSecondary}`}>$$$</span>
@@ -254,8 +259,8 @@ export default function RestaurantView() {
                                                         )}
                                                         {item.score && (
                                                             <span className={styles.ledgerScore} style={{
-                                                                background: item.sentiment === 'love' ? 'rgba(74, 222, 128, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                                                color: item.sentiment === 'love' ? 'var(--green-400)' : 'var(--red-400)'
+                                                                background: item.sentiment === 'love' ? 'rgba(74, 222, 128, 0.2)' : item.sentiment === 'fine' ? 'rgba(96, 165, 250, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                                                color: item.sentiment === 'love' ? 'var(--green-400)' : item.sentiment === 'fine' ? 'var(--blue-400)' : 'var(--red-400)'
                                                             }}>
                                                                 {item.score}
                                                             </span>
@@ -295,6 +300,30 @@ export default function RestaurantView() {
                                 {loveItItems.map((item, idx) => (
                                     <div key={idx} className={styles.avoidItem}>
                                         <div className={styles.avoidIcon} style={{ background: 'rgba(74, 222, 128, 0.1)', color: 'var(--green-400)' }}>
+                                            <span className="material-symbols-outlined">restaurant</span>
+                                        </div>
+                                        <div>
+                                            <h4 className={styles.avoidItemTitle}>{item.title}</h4>
+                                            <p className={styles.avoidItemDesc}>{item.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Just Fine List */}
+                    {fineItems.length > 0 && (
+                        <div className={styles.avoidList} style={{ borderColor: 'rgba(96, 165, 250, 0.2)', background: 'linear-gradient(180deg, rgba(96, 165, 250, 0.05) 0%, rgba(30, 41, 59, 0) 100%)' }}>
+                            <span className={`material-symbols-outlined ${styles.avoidBgIcon}`} style={{ color: 'rgba(96, 165, 250, 0.1)' }}>sentiment_satisfied</span>
+                            <h3 className={styles.avoidTitle} style={{ color: 'var(--blue-400)' }}>
+                                <span className="material-symbols-outlined" style={{ color: 'var(--blue-400)' }}>sentiment_satisfied</span>
+                                Just Fine
+                            </h3>
+                            <div className={styles.avoidItems}>
+                                {fineItems.map((item, idx) => (
+                                    <div key={idx} className={styles.avoidItem}>
+                                        <div className={styles.avoidIcon} style={{ background: 'rgba(96, 165, 250, 0.1)', color: 'var(--blue-400)' }}>
                                             <span className="material-symbols-outlined">restaurant</span>
                                         </div>
                                         <div>

@@ -244,7 +244,7 @@ export default function Settings() {
                     {/* Avatar Section */}
                     <div className={styles.avatarSection}>
                         <div className={styles.avatarWrapper}>
-                            <div className={styles.avatar} style={{ backgroundImage: `url('${currentUser.avatar}')` }} />
+                            <div className={styles.avatar} style={currentUser.avatar ? { backgroundImage: `url('${currentUser.avatar}')` } : { backgroundColor: 'var(--slate-200)' }} />
                             <label htmlFor="avatar-upload-settings" className={styles.uploadIconBtn}>
                                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>photo_camera</span>
                                 <input

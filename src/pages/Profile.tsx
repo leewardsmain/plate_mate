@@ -146,7 +146,7 @@ export default function Profile() {
             <section className={`${styles.hero} glass-panel`}>
                 <div className={styles.userInfo}>
                     <div className={styles.avatarWrapper}>
-                        <div className={styles.avatar} style={{ backgroundImage: `url('${currentUser.avatar}')` }} />
+                        <div className={styles.avatar} style={currentUser.avatar ? { backgroundImage: `url('${currentUser.avatar}')` } : { backgroundColor: 'var(--slate-200)' }} />
                         <label htmlFor="avatar-upload-profile" className={styles.editBtn}>
                             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>edit</span>
                             <input
@@ -160,12 +160,16 @@ export default function Profile() {
                     </div>
                     <div className={styles.nameBlock}>
                         <div>
-                            <h1 className={styles.name}>{currentUser.name}</h1>
-                            <p className={styles.handleLocation}>@{currentUser.handle} • {currentUser.location}</p>
+                            <h1 className={styles.name}>{currentUser.name || 'Anonymous User'}</h1>
+                            <p className={styles.handleLocation}>
+                                @{currentUser.handle || 'user'} {currentUser.location && `• ${currentUser.location}`}
+                            </p>
                         </div>
-                        <p className={styles.bio}>
-                            {currentUser.bio}
-                        </p>
+                        {currentUser.bio && (
+                            <p className={styles.bio}>
+                                {currentUser.bio}
+                            </p>
+                        )}
                     </div>
                 </div>
 

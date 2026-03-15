@@ -32,8 +32,11 @@ export default function MyRestaurants() {
             const allDishes = circleReviewsForRest.flatMap(r => r.dishes);
             const recentCustomPhoto = allDishes.find(d => d.img && !d.img.includes('unsplash.com'))?.img;
 
-            // 2. Fall back to Google Places Photo, then to absolute default
+            // 2. Fall back to custom header, then Google Places Photo, then to absolute default
             let img = recentCustomPhoto;
+            if (!img && cachedDetails?.customHeaderImage) {
+                img = cachedDetails.customHeaderImage;
+            }
             if (!img && cachedDetails?.photos && cachedDetails.photos.length > 0) {
                 img = api.getRestaurantPhotoUrl(cachedDetails.photos[0].photo_reference);
             }
@@ -42,7 +45,7 @@ export default function MyRestaurants() {
                 id,
                 name: sampleReview?.restaurantName || cachedDetails?.name || 'Saved Restaurant', // Fallback if no reviews yet
                 location: sampleReview?.location || cachedDetails?.formatted_address || 'Location Pending',
-                img: img || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80',
+                img: img || 'https://images.unsplash.com/photo-1550966871-3ed3c6227b42?w=1600&q=80',
                 reviewCount: myReviewsForRest.length,
                 circleReviewCount: circleReviewsForRest.length,
                 latestReviewTime: myReviewsForRest[0]?.time || 'Saved',
