@@ -20,16 +20,34 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 exports.handler = async (event) => {
-    console.log("Event:", JSON.stringify(event));
+    console.log("--- HANDLER START ---");
+    console.log("Event:", JSON.stringify({
+        ...event,
+        body: event.body ? (event.body.length > 500 ? event.body.substring(0, 500) + "..." : event.body) : null
+    }));
+
+    // Log environment variable status (without values)
+    console.log("Environment Status:", {
+        REVIEWS_TABLE,
+        USERS_TABLE,
+        AVATAR_BUCKET,
+        RESTAURANTS_TABLE,
+        AWS_REGION,
+        IS_LOCALSTACK,
+        HAS_GOOGLE_KEY: !!process.env.GOOGLE_API_KEY,
+        USE_MOCK_DATA: process.env.USE_MOCK_DATA,
+        NODE_ENV: process.env.NODE_ENV
+    });
 
     // Initialize clients inside handler for better test isolation and lazy loading
     if (!ddbDocClient) {
+        console.log("Initializing DynamoDB Client...");
         const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
         const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
         
         const clientConfig = { region: AWS_REGION };
         if (IS_LOCALSTACK) {
-            // In LocalStack, lambda runs in a container and needs to reach the 'localstack' host
+            console.log("LocalStack detected, setting endpoint...");
             const endpoint = process.env.LOCALSTACK_HOSTNAME 
                 ? `http://${process.env.LOCALSTACK_HOSTNAME}:4566`
                 : "http://localstack:4566";
@@ -43,6 +61,7 @@ exports.handler = async (event) => {
     }
 
     if (!s3Client) {
+        console.log("Initializing S3 Client...");
         const { S3Client } = require("@aws-sdk/client-s3");
         
         const clientConfig = { region: AWS_REGION };
@@ -102,29 +121,35 @@ exports.handler = async (event) => {
     };
 
     if (httpMethod === 'OPTIONS') {
+        console.log("Handling OPTIONS request...");
         return { statusCode: 200, headers, body: '' };
     }
 
     try {
         // --- REVIEWS ROUTES ---
         if (httpMethod === 'GET' && path === '/reviews') {
+            console.log(`Fetching reviews from ${REVIEWS_TABLE}...`);
             const result = await ddbDocClient.send(new ScanCommand({ TableName: REVIEWS_TABLE }));
+            console.log(`Found ${result.Items?.length || 0} reviews.`);
             return { statusCode: 200, headers, body: JSON.stringify(result.Items) };
         }
 
         else if (httpMethod === 'POST' && path === '/reviews') {
+            const reviewId = body.id || `r_${Date.now()}`;
+            console.log(`Creating review ${reviewId} in ${REVIEWS_TABLE}...`);
             await ddbDocClient.send(new PutCommand({
                 TableName: REVIEWS_TABLE,
                 Item: {
-                    reviewId: body.id || `r_${Date.now()}`,
+                    reviewId,
                     ...body
                 }
             }));
-            return { statusCode: 201, headers, body: JSON.stringify({ message: "Review created" }) };
+            return { statusCode: 201, headers, body: JSON.stringify({ message: "Review created", reviewId }) };
         }
 
         else if (httpMethod === 'DELETE' && path.startsWith('/reviews/')) {
             const reviewId = path.split('/').pop();
+            console.log(`Deleting review ${reviewId} from ${REVIEWS_TABLE}...`);
             await ddbDocClient.send(new DeleteCommand({
                 TableName: REVIEWS_TABLE,
                 Key: { reviewId }
@@ -134,18 +159,24 @@ exports.handler = async (event) => {
 
         else if (httpMethod === 'POST' && path.includes('/like')) {
             const reviewId = path.split('/')[2];
+            console.log(`Toggling like for review ${reviewId}...`);
             const getRes = await ddbDocClient.send(new GetCommand({
                 TableName: REVIEWS_TABLE,
                 Key: { reviewId }
             }));
 
-            if (!getRes.Item) return { statusCode: 404, headers, body: JSON.stringify({ error: "Not found" }) };
+            if (!getRes.Item) {
+                console.log(`Review ${reviewId} not found.`);
+                return { statusCode: 404, headers, body: JSON.stringify({ error: "Not found" }) };
+            }
 
             const userId = body.userId;
             let likedBy = getRes.Item.likedBy || [];
             if (likedBy.includes(userId)) {
+                console.log(`User ${userId} unliking review.`);
                 likedBy = likedBy.filter(id => id !== userId);
             } else {
+                console.log(`User ${userId} liking review.`);
                 likedBy.push(userId);
             }
 
@@ -171,6 +202,7 @@ exports.handler = async (event) => {
                 time: "Just now",
                 avatar: "https://i.pravatar.cc/150?img=32"
             };
+            console.log(`Adding comment to review ${reviewId}:`, JSON.stringify(newComment));
 
             await ddbDocClient.send(new UpdateCommand({
                 TableName: REVIEWS_TABLE,
@@ -192,6 +224,7 @@ exports.handler = async (event) => {
 
         else if (httpMethod === 'PUT' && path.startsWith('/reviews/')) {
             const reviewId = path.split('/').pop();
+            console.log(`Updating review ${reviewId}...`);
             await ddbDocClient.send(new UpdateCommand({
                 TableName: REVIEWS_TABLE,
                 Key: { reviewId },
@@ -210,15 +243,18 @@ exports.handler = async (event) => {
         // --- USERS ROUTES ---
         else if (httpMethod === 'GET' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
+            console.log(`Fetching user ${userId} from ${USERS_TABLE}...`);
             const result = await ddbDocClient.send(new GetCommand({
                 TableName: USERS_TABLE,
                 Key: { userId }
             }));
+            console.log(`User found: ${!!result.Item}`);
             return { statusCode: 200, headers, body: JSON.stringify(result.Item || {}) };
         }
 
         else if (httpMethod === 'PUT' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
+            console.log(`Updating user ${userId} in ${USERS_TABLE}...`);
             await ddbDocClient.send(new PutCommand({
                 TableName: USERS_TABLE,
                 Item: { userId, ...body }
@@ -228,6 +264,7 @@ exports.handler = async (event) => {
 
         else if (httpMethod === 'DELETE' && path.startsWith('/users/') && !path.includes('/avatar') && !path.includes('/meal-photo')) {
             const userId = path.split('/').pop();
+            console.log(`Deleting user ${userId} from ${USERS_TABLE}...`);
             await ddbDocClient.send(new DeleteCommand({
                 TableName: USERS_TABLE,
                 Key: { userId }
@@ -249,6 +286,8 @@ exports.handler = async (event) => {
                 key = `meals/headers/${placeId}/${Date.now()}_${body.fileName || "header.jpg"}`;
             }
 
+            console.log(`Generating presigned URL for key: ${key} in bucket: ${AVATAR_BUCKET}`);
+
             const command = new PutObjectCommand({
                 Bucket: AVATAR_BUCKET,
                 Key: key,
@@ -268,6 +307,8 @@ exports.handler = async (event) => {
                 publicUrl = `https://${AVATAR_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${key}`;
             }
 
+            console.log(`Generated publicUrl: ${publicUrl}`);
+
             return {
                 statusCode: 200,
                 headers,
@@ -278,12 +319,14 @@ exports.handler = async (event) => {
         // --- RESTAURANTS ROUTES ---
         else if (httpMethod === 'PUT' && path.startsWith('/restaurants/')) {
             const placeId = path.split('/').pop();
+            console.log(`Updating cached restaurant ${placeId} in ${RESTAURANTS_TABLE}...`);
             const getRes = await ddbDocClient.send(new GetCommand({
                 TableName: RESTAURANTS_TABLE,
                 Key: { placeId }
             }));
 
             if (!getRes.Item) {
+                console.log(`Restaurant ${placeId} not found in cache.`);
                 return { statusCode: 404, headers, body: JSON.stringify({ error: "Restaurant not found in cache. Fetch it first." }) };
             }
 
@@ -304,6 +347,7 @@ exports.handler = async (event) => {
                 ExpressionAttributeValues
             }));
 
+            console.log(`Successfully updated restaurant ${placeId}.`);
             return { statusCode: 200, headers, body: JSON.stringify({ message: "Restaurant updated" }) };
         }
 
@@ -312,7 +356,12 @@ exports.handler = async (event) => {
             let query = event.queryStringParameters?.q;
             const location = event.queryStringParameters?.location;
 
-            if (!query) return { statusCode: 400, headers, body: JSON.stringify({ error: "Query required" }) };
+            console.log(`RESTAURANT SEARCH: query="${query}", location="${location}"`);
+
+            if (!query) {
+                console.log("Error: Search query missing.");
+                return { statusCode: 400, headers, body: JSON.stringify({ error: "Query required" }) };
+            }
             
             const mockResults = [
                 { place_id: "mock_1", name: "The Pizza Palace", formatted_address: "123 Cheese St, San Francisco, CA", rating: 4.5, price_level: 2, opening_hours: { open_now: true } },
@@ -322,51 +371,66 @@ exports.handler = async (event) => {
 
             // If no API key, return mock data immediately
             if (!GOOGLE_API_KEY || GOOGLE_API_KEY.trim() === "") {
+                console.log("SEARCH: GOOGLE_API_KEY is missing or empty.");
                 if (process.env.USE_MOCK_DATA === "true") {
+                    console.log("SEARCH: USE_MOCK_DATA is true, returning mock results.");
                     return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
                 }
+                console.log("SEARCH: USE_MOCK_DATA is false, returning 401.");
                 return { statusCode: 401, headers, body: JSON.stringify({ error: "Google API Key missing" }) };
             }
 
             if (location) query = `${query} in ${location}`;
             const googleUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${GOOGLE_API_KEY}`;
             
+            console.log(`SEARCH: Calling Google API: ${googleUrl.replace(GOOGLE_API_KEY, "HIDDEN")}`);
+            
             try {
                 const response = await fetch(googleUrl);
                 const data = await response.json();
+                console.log(`SEARCH: Google response status: ${data.status}`);
                 
                 if (data.status === 'OK' || data.status === 'ZERO_RESULTS') {
+                    console.log(`SEARCH: Found ${data.results?.length || 0} results.`);
                     return { statusCode: 200, headers, body: JSON.stringify(data.results || []) };
                 }
                 
                 // If Google returned an error status (like REQUEST_DENIED), fallback to mock if enabled
+                console.log(`SEARCH: Google returned non-OK status: ${data.status}`);
+                if (data.error_message) console.log(`SEARCH: Google Error Message: ${data.error_message}`);
+
                 if (process.env.USE_MOCK_DATA === "true") {
-                    console.log(`SEARCH: Google denied (${data.status}), returning MOCK data`);
-                    // We return the ARRAY directly to satisfy the frontend's expectations
+                    console.log(`SEARCH: USE_MOCK_DATA is true, falling back to MOCK data.`);
                     return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
                 }
-                return { statusCode: 502, headers, body: JSON.stringify({ error: `Google API error: ${data.status}` }) };
+                return { statusCode: 502, headers, body: JSON.stringify({ error: `Google API error: ${data.status}`, details: data.error_message }) };
 
             } catch (err) {
-                console.error("SEARCH: Google API fetch failed:", err);
+                console.error("SEARCH: Google API fetch failed with exception:", err);
                 if (process.env.USE_MOCK_DATA === "true") {
+                    console.log(`SEARCH: USE_MOCK_DATA is true, falling back to MOCK data after exception.`);
                     return { statusCode: 200, headers, body: JSON.stringify(mockResults) };
                 }
-                return { statusCode: 502, headers, body: JSON.stringify({ error: "Failed to reach Google API" }) };
+                return { statusCode: 502, headers, body: JSON.stringify({ error: "Failed to reach Google API", details: err.message }) };
             }
         }
 
         else if (httpMethod === 'GET' && path.includes('/photo/')) {
             const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
             const photoRef = path.split('/').pop();
-            const response = await fetch(`https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_API_KEY}`);
+            console.log(`PHOTO: Fetching photo with ref: ${photoRef.substring(0, 20)}...`);
+            
+            const googleUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_API_KEY}`;
+            const response = await fetch(googleUrl);
 
             if (!response.ok) {
+                console.log(`PHOTO: Google returned ${response.status} ${response.statusText}`);
                 return { statusCode: response.status, headers, body: JSON.stringify({ error: "Failed to fetch photo" }) };
             }
 
             const buffer = await response.arrayBuffer();
             const base64 = Buffer.from(buffer).toString('base64');
+            console.log(`PHOTO: Successfully fetched and encoded photo (${buffer.byteLength} bytes).`);
 
             return {
                 statusCode: 200,
@@ -382,31 +446,43 @@ exports.handler = async (event) => {
         else if (httpMethod === 'GET' && path.startsWith('/restaurants/')) {
             const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
             const placeId = path.split('/').pop();
+            console.log(`RESTAURANT DETAILS: placeId=${placeId}`);
 
             try {
+                console.log(`Checking cache in ${RESTAURANTS_TABLE} for ${placeId}...`);
                 const cacheRes = await ddbDocClient.send(new GetCommand({
                     TableName: RESTAURANTS_TABLE,
                     Key: { placeId }
                 }));
 
                 if (cacheRes.Item) {
+                    console.log(`Cache HIT for ${placeId}.`);
                     return { statusCode: 200, headers, body: JSON.stringify(cacheRes.Item) };
                 }
+                console.log(`Cache MISS for ${placeId}.`);
             } catch (err) {
-                console.error("Cache Read Error:", err);
+                console.error("Cache Read Error (non-fatal):", err);
             }
 
             let data = { result: null, status: 'UNKNOWN' };
-            try {
-                const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`);
-                data = await response.json();
-            } catch (err) {
-                console.error("Google Fetch Error:", err);
+            if (GOOGLE_API_KEY) {
+                const googleUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`;
+                console.log(`Calling Google API for details: ${googleUrl.replace(GOOGLE_API_KEY, "HIDDEN")}`);
+                try {
+                    const response = await fetch(googleUrl);
+                    data = await response.json();
+                    console.log(`Google Details status: ${data.status}`);
+                } catch (err) {
+                    console.error("Google Fetch Error:", err);
+                }
+            } else {
+                console.log("No GOOGLE_API_KEY, skipping Google call.");
             }
 
             let result = data.result || null;
 
             if (!result && process.env.USE_MOCK_DATA === "true") {
+                console.log(`No results from Google, returning MOCK details for ${placeId}.`);
                 const mockDetails = {
                     mock_1: { name: "The Pizza Palace", formatted_address: "123 Cheese St, San Francisco, CA", rating: 4.5, price_level: 2, formatted_phone_number: "(555) 123-4567", website: "https://pizzapalace.example.com", opening_hours: { weekday_text: ["Monday: 11:00 AM – 10:00 PM"] } },
                     mock_2: { name: "Burger Haven", formatted_address: "456 Pattie Ln, San Francisco, CA", rating: 4.2, price_level: 1, formatted_phone_number: "(555) 987-6543" },
@@ -417,6 +493,7 @@ exports.handler = async (event) => {
 
             if (result && result.name) {
                 try {
+                    console.log(`Caching restaurant details for ${placeId}...`);
                     await ddbDocClient.send(new PutCommand({
                         TableName: RESTAURANTS_TABLE,
                         Item: {
@@ -426,13 +503,14 @@ exports.handler = async (event) => {
                         }
                     }));
                 } catch (err) {
-                    console.error("Cache Write Error:", err);
+                    console.error("Cache Write Error (non-fatal):", err);
                 }
             }
 
             return { statusCode: 200, headers, body: JSON.stringify(result || {}) };
         }
 
+        console.log(`Route not found: ${httpMethod} ${path}`);
         return {
             statusCode: 404,
             headers,
@@ -440,7 +518,7 @@ exports.handler = async (event) => {
         };
 
     } catch (error) {
-        console.error("Handler Error:", error);
+        console.error("HANDLER CRITICAL ERROR:", error);
         console.error("Stack Trace:", error.stack);
         return {
             statusCode: 500,
@@ -451,5 +529,7 @@ exports.handler = async (event) => {
                 details: "Check CloudWatch logs for more info"
             })
         };
+    } finally {
+        console.log("--- HANDLER END ---");
     }
 };
