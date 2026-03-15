@@ -12,6 +12,7 @@ import SignUp from './pages/auth/SignUp';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicRoute from './components/auth/PublicRoute';
 import { useAppStore } from './store/useAppStore';
 
 import Layout from './components/layout/Layout';
@@ -34,10 +35,15 @@ const router = createBrowserRouter([
       }
     ]
   },
-  { path: '/login', element: <Login /> },
-  { path: '/signup', element: <SignUp /> },
-  { path: '/verify-email', element: <VerifyEmail /> },
-  { path: '/forgot-password', element: <ForgotPassword /> },
+  {
+    element: <PublicRoute />,
+    children: [
+      { path: '/login', element: <Login /> },
+      { path: '/signup', element: <SignUp /> },
+      { path: '/verify-email', element: <VerifyEmail /> },
+      { path: '/forgot-password', element: <ForgotPassword /> },
+    ]
+  }
 ]);
 
 function App() {
