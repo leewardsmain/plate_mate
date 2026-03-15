@@ -44,6 +44,7 @@ const apiRequest = async (path: string, options: RequestInit = {}) => {
                 'Content-Type': 'application/json',
                 ...options.headers,
             },
+            cache: options.cache || 'no-cache',
         });
 
         console.log(`API RESPONSE [${response.status}]: ${url}`);
