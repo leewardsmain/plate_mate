@@ -10,9 +10,10 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr minmax(auto, 400px) 1fr;
     align-items: center;
-    justify-content: space-between;
+    gap: 1rem;
     padding: 0.5rem 1rem;
     width: 100%;
     box-sizing: border-box;
@@ -32,6 +33,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    justify-self: start;
 }
 
 @media (min-width: 640px) {
@@ -65,9 +67,8 @@
 }
 
 .searchWrapper {
-    flex: 1;
-    max-width: 400px;
-    margin: 0 2rem;
+    width: 100%;
+    justify-self: center;
 }
 
 @media (max-width: 768px) {
@@ -80,6 +81,7 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    justify-self: end;
 }
 
 @media (min-width: 640px) {
