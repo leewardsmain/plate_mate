@@ -172,7 +172,21 @@
     /* space for mobile bottom nav */
 }
 
+.hideMobile {
+    display: none !important;
+}
+
+.hideMobileText {
+    display: none;
+}
+
 @media (min-width: 640px) {
+    .hideMobile {
+        display: flex !important;
+    }
+    .hideMobileText {
+        display: inline;
+    }
     .mainContent {
         padding: 1.25rem;
         gap: 1.75rem;
